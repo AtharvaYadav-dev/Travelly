@@ -1,5 +1,7 @@
 ﻿TRAVELLY – AI TRIP & OUTING PLANNER
+ 
 Click on the Link to Preview - https://travelly1-seven.vercel.app/
+
 Comprehensive Technical Documentation
 
 Prepared by: Atharva Yadav
@@ -486,4 +488,5 @@ APPENDIX AL: CODE QUALITY PRACTICES
 - Small, focused components; descriptive names; JSDoc for core functions.
 
 End of Document
+
 
