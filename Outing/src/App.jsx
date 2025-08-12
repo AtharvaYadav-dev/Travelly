@@ -1,88 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { supabase } from './supabase';
+import React, { useEffect } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from './store/useAuth';
+import Hero from './Hero';
+import Tooltip from './Tooltip';
+import Layout from './Layout';
+import Navbar from './Navbar';
 
 const App = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user, init } = useAuth();
 
   useEffect(() => {
-    const getSession = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error('Session error:', error);
-        return;
-      }
-
-      if (session?.user) {
-        setUser(session.user); // ✅ Latest user_metadata included
-      }
-    };
-
-    getSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+    init();
+  }, [init]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    alert('Logged out');
-    setUser(null);
-    navigate('/login');
+    try {
+      const { supabase } = await import('./supabase');
+      await supabase.auth.signOut();
+      alert('Logged out');
+      navigate('/login');
+    } catch (_) {}
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-blue-600 text-white shadow-md">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-xl font-bold">Travelly</h1>
-          
-          <nav className="flex gap-4 items-center">
-            <Link to="/">Home</Link>
-            <Link to="/planner">Planner</Link>
-            <Link to="/saved">Saved</Link>
-
-            {/* ✅ Show full name from user_metadata if available */}
-            {user?.user_metadata?.full_name && (
-              <span className="text-sm text-green-200">
-                Welcome, {user.user_metadata.full_name} 👋
-              </span>
-            )}
-
-            {!user && (
-              <>
-              
-                <Link to="/login">Login</Link>
-                <Link to="/signup">Signup</Link>
-              </>
-            )}
-
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="text-sm text-red-300 hover:text-white"
-              >
-                Logout
-              </button>
-            )}
-          </nav>
-        </div>
-      </header>
-
-      <main className="p-4 flex-1">
-        <Outlet />
+    <Layout>
+      <Navbar user={user} onLogout={handleLogout} />
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 sm:py-10 md:py-14">
+        {(() => {
+          const location = useLocation();
+          if (location.pathname === "/") {
+            return <Hero />;
+          }
+          return <Outlet />;
+        })()}
       </main>
-    </div>
+    </Layout>
   );
 };
 
