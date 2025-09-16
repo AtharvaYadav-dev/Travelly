@@ -8,7 +8,8 @@ const Footer = () => {
         <div className="flex gap-4 text-sm">
           <a href="https://www.instagram.com/accounts/login/?hl=en" target="_blank" className="hover:text-indigo-100 transition">Instagram</a>
           <a href="https://x.com/i/flow/login?lang=en" target="_blank" className="hover:text-indigo-100 transition">Twitter</a>
-          <a href="/contact" target="_blank" className="hover:text-indigo-100 transition">Contact</a>
+{/*           <a href="/contact" target="_blank" className="hover:text-indigo-100 transition">Contact</a> */}
+          <NavLink to="/contact" className="hover:text-indigo-100 transition">Contact</NavLink>
         </div>
       </div>
     </footer>
