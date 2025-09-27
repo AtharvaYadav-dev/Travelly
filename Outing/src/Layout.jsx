@@ -1,6 +1,5 @@
 import React from "react";
 
-import DarkModeToggle from "./DarkModeToggle";
 import Footer from "./Footer";
 
 /**
@@ -9,7 +8,7 @@ import Footer from "./Footer";
  */
 const Layout = ({ children }) => (
   <div className="min-h-screen bg-gradient-to-tr from-indigo-100 via-fuchsia-100 to-pink-50 flex flex-col">
-    <DarkModeToggle />
+    {/* Dark mode toggle hidden as requested */}
     {/* Header and nav will be slotted in by parent */}
     {children}
     <Footer />
