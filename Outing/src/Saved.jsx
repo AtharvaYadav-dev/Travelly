@@ -40,6 +40,24 @@ const Saved = () => {
     setLoading(false);
   };
 
+  // Focus behavior: when a card is expanded, scroll it into view and allow ESC to close
+  useEffect(() => {
+    if (expandedId) {
+      const el = document.getElementById(`trip-card-${expandedId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+      }
+    }
+  }, [expandedId]);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setExpandedId(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   const deleteItinerary = async (id) => {
     if (!confirm('Delete this itinerary permanently?')) return;
     const { error } = await supabase.from('itineraries').delete().eq('id', id);
@@ -105,11 +123,19 @@ const Saved = () => {
           <p>No itineraries found. Try adjusting filters or create a new plan.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={`${expandedId ? 'grid grid-cols-1' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'} gap-6 transition-all`}>
           {filteredItineraries.map((trip) => (
             <div
               key={trip.id}
-              className="glass-card p-5 rounded-2xl shadow-xl border border-indigo-100 backdrop-blur-md bg-white/70 hover:scale-[1.01] transition-transform duration-200"
+              id={`trip-card-${trip.id}`}
+              className={
+                `glass-card p-5 rounded-2xl shadow-xl border border-indigo-100 backdrop-blur-md bg-white/70 transition-all duration-300 ` +
+                (expandedId === trip.id
+                  ? 'ring-2 ring-indigo-300 scale-[1.01] col-span-full'
+                  : expandedId
+                    ? 'opacity-50 hover:opacity-70'
+                    : 'hover:scale-[1.01]')
+              }
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -135,7 +161,7 @@ const Saved = () => {
                 {trip.ai_plan && (
                   <button
                     onClick={() => setExpandedId(expandedId === trip.id ? null : trip.id)}
-                    className="px-3 py-1.5 rounded-lg bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-pink-400 text-white text-sm font-semibold shadow hover:scale-[1.02] active:scale-95 transition-all"
+                    className={`px-3 py-1.5 rounded-lg bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-pink-400 text-white text-sm font-semibold shadow active:scale-95 transition-all ${expandedId === trip.id ? 'hover:scale-[1.01]' : 'hover:scale-[1.02]'}`}
                   >
                     {expandedId === trip.id ? 'Hide Plan' : 'View Plan'}
                   </button>
