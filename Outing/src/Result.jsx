@@ -71,9 +71,9 @@ const Result = () => {
 
     const costLines = costText
       ? costText
-          .split('\n')
-          .map((line) => line.replace(/^[-•🌟]/, '').trim())
-          .filter((line) => line.length > 3 && line.includes('₹'))
+        .split('\n')
+        .map((line) => line.replace(/^[-•🌟]/, '').trim())
+        .filter((line) => line.length > 3 && line.includes('₹'))
       : [];
 
     return { days, costSummary: costLines };
@@ -148,39 +148,39 @@ After the itinerary, add a detailed Cost Summary (with breakdowns for transport,
     try {
       setLoading(true);
       setNotification({ type: '', message: '' });
-      
+
       const key = import.meta.env.VITE_GEMINI_API_KEY;
       console.log('🔑 API Key present:', !!key);
-      
+
       if (!key) {
         throw new Error('Missing VITE_GEMINI_API_KEY environment variable');
       }
 
       console.log('🚀 Calling Gemini API...');
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            contents: [{ 
-              parts: [{ text: prompt }] 
-            }] 
+          body: JSON.stringify({
+            contents: [{
+              parts: [{ text: prompt }]
+            }]
           }),
         }
       );
 
       console.log('📡 Response status:', response.status);
-      
+
       const raw = await response.text();
       console.log('📦 Raw response length:', raw.length);
-      
+
       let result = null;
-      try { 
-        result = raw ? JSON.parse(raw) : null; 
-      } catch (e) { 
+      try {
+        result = raw ? JSON.parse(raw) : null;
+      } catch (e) {
         console.error('❌ JSON parse error:', e);
-        result = { raw }; 
+        result = { raw };
       }
 
       if (!response.ok) {
@@ -192,7 +192,7 @@ After the itinerary, add a detailed Cost Summary (with breakdowns for transport,
       const text =
         result?.candidates?.[0]?.content?.parts?.[0]?.text ||
         '❌ Failed to generate.';
-      
+
       console.log('✅ Generated text length:', text.length);
       setAiResponse(text);
 
@@ -217,9 +217,9 @@ After the itinerary, add a detailed Cost Summary (with breakdowns for transport,
     } catch (err) {
       console.error('❌ Gemini API Error:', err);
       setAiResponse('❌ Error generating itinerary.');
-      setNotification({ 
-        type: 'error', 
-        message: `Error: ${err?.message || 'Failed to generate itinerary'}` 
+      setNotification({
+        type: 'error',
+        message: `Error: ${err?.message || 'Failed to generate itinerary'}`
       });
     } finally {
       setLoading(false);
@@ -287,135 +287,135 @@ After the itinerary, add a detailed Cost Summary (with breakdowns for transport,
   return (
     <>
       <div className="max-w-3xl mx-auto p-2 sm:p-8" id="itinerary-export">
-      <Notification
-        type={notification.type}
-        message={notification.message}
-        onClose={() => setNotification({ type: '', message: '' })}
-      />
-      <motion.h2
-        className="text-4xl font-extrabold text-center mb-10 drop-shadow-lg"
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-      >
-        <span className="bg-gradient-to-tr from-indigo-600 via-fuchsia-500 to-pink-400 bg-clip-text text-transparent inline-block animate-gradient-move">
-          <span className="inline-block animate-bounce mr-2">🤖</span> Your AI-Powered Trip Plan
-        </span>
-      </motion.h2>
+        <Notification
+          type={notification.type}
+          message={notification.message}
+          onClose={() => setNotification({ type: '', message: '' })}
+        />
+        <motion.h2
+          className="text-4xl font-extrabold text-center mb-10 drop-shadow-lg"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          <span className="bg-gradient-to-tr from-indigo-600 via-fuchsia-500 to-pink-400 bg-clip-text text-transparent inline-block animate-gradient-move">
+            <span className="inline-block animate-bounce mr-2">🤖</span> Your AI-Powered Trip Plan
+          </span>
+        </motion.h2>
 
-      <div className="flex flex-wrap justify-center gap-4 mb-8">
-        <button
-          onClick={() => navigate('/planner')}
-          className="px-5 py-2 rounded-xl bg-gradient-to-tr from-gray-200 via-white to-pink-100 text-gray-700 font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all border border-gray-200"
-        >
-          <span className="mr-2">🔙</span> Back to Planner
-        </button>
-        <button
-          onClick={() => savedData && generateAI(savedData)}
-          disabled={loading}
-          className="px-5 py-2 rounded-xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-pink-400 text-white font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 border border-indigo-200"
-        >
-          {loading && (
-            <span className="w-5 h-5 border-2 border-white border-t-indigo-400 rounded-full animate-spin inline-block"></span>
-          )}
-          <span className="mr-2">🔄</span> Regenerate Plan
-        </button>
-        <button
-          onClick={handleDownloadPDF}
-          className="px-5 py-2 rounded-xl bg-gradient-to-tr from-green-400 via-blue-400 to-indigo-400 text-white font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all flex items-center gap-2 border border-green-200"
-        >
-          <span className="mr-2">⬇️</span> Download as PDF
-        </button>
-        <button
-          onClick={handleCopyPlan}
-          className="px-5 py-2 rounded-xl bg-gradient-to-tr from-amber-300 via-yellow-300 to-orange-300 text-gray-900 font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all flex items-center gap-2 border border-amber-200"
-        >
-          <span className="mr-1">📋</span> Copy Plan
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="flex flex-col items-center justify-center min-h-[320px] gap-4">
-          {/* Lottie travel loader animation */}
-          <div className="w-40 h-40 md:w-56 md:h-56 flex items-center justify-center">
-            <Lottie animationData={travelLoader} loop={true} style={{ width: '100%', height: '100%' }} />
-          </div>
-          {/* Skeleton shimmer loader */}
-          <div className="w-full space-y-6">
-            {[1,2].map((_, idx) => (
-              <div key={idx} className="animate-pulse bg-white/60 dark:bg-dark-glass backdrop-blur rounded-2xl shadow-xl border border-indigo-100 dark:border-dark-border p-8 mb-4">
-                <div className="h-6 w-32 bg-indigo-100 dark:bg-dark-card rounded mb-4"></div>
-                <div className="space-y-2">
-                  <div className="h-4 w-3/4 bg-indigo-50 dark:bg-dark-card rounded"></div>
-                  <div className="h-4 w-2/3 bg-indigo-50 dark:bg-dark-card rounded"></div>
-                  <div className="h-4 w-1/2 bg-indigo-50 dark:bg-dark-card rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-gray-400 dark:text-gray-300 font-medium">Generating your personalized plan...</p>
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
+          <button
+            onClick={() => navigate('/planner')}
+            className="px-5 py-2 rounded-xl bg-gradient-to-tr from-gray-200 via-white to-pink-100 text-gray-700 font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all border border-gray-200"
+          >
+            <span className="mr-2">🔙</span> Back to Planner
+          </button>
+          <button
+            onClick={() => savedData && generateAI(savedData)}
+            disabled={loading}
+            className="px-5 py-2 rounded-xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-pink-400 text-white font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 border border-indigo-200"
+          >
+            {loading && (
+              <span className="w-5 h-5 border-2 border-white border-t-indigo-400 rounded-full animate-spin inline-block"></span>
+            )}
+            <span className="mr-2">🔄</span> Regenerate Plan
+          </button>
+          <button
+            onClick={handleDownloadPDF}
+            className="px-5 py-2 rounded-xl bg-gradient-to-tr from-green-400 via-blue-400 to-indigo-400 text-white font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all flex items-center gap-2 border border-green-200"
+          >
+            <span className="mr-2">⬇️</span> Download as PDF
+          </button>
+          <button
+            onClick={handleCopyPlan}
+            className="px-5 py-2 rounded-xl bg-gradient-to-tr from-amber-300 via-yellow-300 to-orange-300 text-gray-900 font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all flex items-center gap-2 border border-amber-200"
+          >
+            <span className="mr-1">📋</span> Copy Plan
+          </button>
         </div>
-      ) : formattedResponse.length > 0 ? (
-        <>
-           <div className="space-y-8">
-            {formattedResponse.map((day, i) => (
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center min-h-[320px] gap-4">
+            {/* Lottie travel loader animation */}
+            <div className="w-40 h-40 md:w-56 md:h-56 flex items-center justify-center">
+              <Lottie animationData={travelLoader} loop={true} style={{ width: '100%', height: '100%' }} />
+            </div>
+            {/* Skeleton shimmer loader */}
+            <div className="w-full space-y-6">
+              {[1, 2].map((_, idx) => (
+                <div key={idx} className="animate-pulse bg-white/60 dark:bg-dark-glass backdrop-blur rounded-2xl shadow-xl border border-indigo-100 dark:border-dark-border p-8 mb-4">
+                  <div className="h-6 w-32 bg-indigo-100 dark:bg-dark-card rounded mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 w-3/4 bg-indigo-50 dark:bg-dark-card rounded"></div>
+                    <div className="h-4 w-2/3 bg-indigo-50 dark:bg-dark-card rounded"></div>
+                    <div className="h-4 w-1/2 bg-indigo-50 dark:bg-dark-card rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-gray-400 dark:text-gray-300 font-medium">Generating your personalized plan...</p>
+          </div>
+        ) : formattedResponse.length > 0 ? (
+          <>
+            <div className="space-y-8">
+              {formattedResponse.map((day, i) => (
+                <motion.div
+                  key={i}
+                  className="glass-card p-4 sm:p-8 rounded-2xl shadow-xl border border-indigo-100 dark:border-dark-border backdrop-blur-md bg-white/70 dark:bg-dark-glass dark:shadow-glass-dark hover:scale-[1.02] transition-transform duration-200"
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.6, delay: i * 0.13 }}
+                >
+                  <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-300 mb-3 flex items-center gap-2">
+                    <span className="inline-block text-2xl">🗓️</span> {day.title}
+                  </h3>
+                  <ul className="space-y-2 text-gray-700 dark:text-gray-100">
+                    {day.items.map((item, j) => {
+                      // Icon logic for activity times
+                      let icon = '📍';
+                      if (/morning/i.test(item)) icon = '☀️';
+                      else if (/afternoon/i.test(item)) icon = '🌞';
+                      else if (/evening/i.test(item)) icon = '🌙';
+                      else if (/breakfast|brunch/i.test(item)) icon = '🍳';
+                      else if (/lunch/i.test(item)) icon = '🍽️';
+                      else if (/dinner/i.test(item)) icon = '🍽️';
+                      else if (/party|night|event/i.test(item)) icon = '🎉';
+                      return (
+                        <li key={j} className="flex items-center gap-2">
+                          <span className="inline-block text-lg">{icon}</span> {item}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </motion.div>
+              ))}
+            </div>
+            {costSummary.length > 0 && (
               <motion.div
-                key={i}
-                className="glass-card p-4 sm:p-8 rounded-2xl shadow-xl border border-indigo-100 dark:border-dark-border backdrop-blur-md bg-white/70 dark:bg-dark-glass dark:shadow-glass-dark hover:scale-[1.02] transition-transform duration-200"
+                className="glass-card p-4 sm:p-8 rounded-2xl shadow-xl border border-green-100 dark:border-dark-border backdrop-blur-md bg-green-50/60 dark:bg-dark-glass dark:shadow-glass-dark mt-10"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: i * 0.13 }}
+                transition={{ duration: 0.6, delay: (formattedResponse.length + 1) * 0.13 }}
               >
-                <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-300 mb-3 flex items-center gap-2">
-                  <span className="inline-block text-2xl">🗓️</span> {day.title}
+                <h3 className="text-xl font-bold text-green-700 dark:text-green-300 mb-4 flex items-center gap-2">
+                  <span className="inline-block text-2xl">💸</span> Cost Summary
                 </h3>
-                <ul className="space-y-2 text-gray-700 dark:text-gray-100">
-                  {day.items.map((item, j) => {
-                    // Icon logic for activity times
-                    let icon = '📍';
-                    if (/morning/i.test(item)) icon = '☀️';
-                    else if (/afternoon/i.test(item)) icon = '🌞';
-                    else if (/evening/i.test(item)) icon = '🌙';
-                    else if (/breakfast|brunch/i.test(item)) icon = '🍳';
-                    else if (/lunch/i.test(item)) icon = '🍽️';
-                    else if (/dinner/i.test(item)) icon = '🍽️';
-                    else if (/party|night|event/i.test(item)) icon = '🎉';
-                    return (
-                      <li key={j} className="flex items-center gap-2">
-                        <span className="inline-block text-lg">{icon}</span> {item}
-                      </li>
-                    );
-                  })}
+                <ul className="space-y-2 text-gray-800 dark:text-gray-100">
+                  {costSummary.map((item, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <span className="inline-block text-lg">💰</span> {item}
+                    </li>
+                  ))}
                 </ul>
               </motion.div>
-            ))}
-          </div>
-          {costSummary.length > 0 && (
-            <motion.div
-              className="glass-card p-4 sm:p-8 rounded-2xl shadow-xl border border-green-100 dark:border-dark-border backdrop-blur-md bg-green-50/60 dark:bg-dark-glass dark:shadow-glass-dark mt-10"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: (formattedResponse.length + 1) * 0.13 }}
-            >
-              <h3 className="text-xl font-bold text-green-700 dark:text-green-300 mb-4 flex items-center gap-2">
-                <span className="inline-block text-2xl">💸</span> Cost Summary
-              </h3>
-              <ul className="space-y-2 text-gray-800 dark:text-gray-100">
-                {costSummary.map((item, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <span className="inline-block text-lg">💰</span> {item}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          )}
-        </>
-      ) : (
-        <p className="text-red-500 text-center font-semibold">{aiResponse}</p>
-      )}
-    </div>
+            )}
+          </>
+        ) : (
+          <p className="text-red-500 text-center font-semibold">{aiResponse}</p>
+        )}
+      </div>
       <FAB show={showFab} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} label="Scroll to Top" />
     </>
   );
