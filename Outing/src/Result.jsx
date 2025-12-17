@@ -51,31 +51,73 @@ const Result = () => {
   }, []);
 
   const formatAIResponse = (text) => {
-    const [mainText, costText] = text.split(/Cost Summary:/i);
+    console.log('📝 Formatting AI response, length:', text.length);
 
-    const days = mainText
-      .split(/Day\s*\d/i)
-      .filter(Boolean)
-      .map((day, index) => {
-        const blocks = day
-          .split('\n')
-          .map((line) =>
-            line.replace(/^\*+/, '').replace(/^[-•🌟]/, '').trim()
-          )
-          .filter((line) => line.length > 5 && line.length < 300);
-        return {
-          title: `Day ${index + 1}`,
-          items: blocks,
-        };
-      });
+    // Remove HTML tags if present
+    const cleanText = text.replace(/<[^>]*>/g, '');
+
+    const [mainText, costText] = cleanText.split(/Cost Summary:/i);
+
+    // Try multiple patterns to detect days
+    const dayPatterns = [
+      /Day\s*\d+/gi,           // "Day 1", "Day 2"
+      /\*\*Day\s*\d+\*\*/gi,   // "**Day 1**"
+      /##\s*Day\s*\d+/gi,      // "## Day 1"
+      /Day\s+\d+:/gi,          // "Day 1:"
+    ];
+
+    let days = [];
+
+    // Try each pattern
+    for (const pattern of dayPatterns) {
+      const splits = mainText.split(pattern).filter(Boolean);
+      if (splits.length > 1) {
+        days = splits.map((day, index) => {
+          const blocks = day
+            .split('\n')
+            .map((line) =>
+              line
+                .replace(/^[\*\#\-•🌟]+/, '')  // Remove markdown and bullets
+                .replace(/\*\*/g, '')           // Remove bold markers
+                .trim()
+            )
+            .filter((line) => line.length > 5 && line.length < 500);
+
+          return {
+            title: `Day ${index + 1}`,
+            items: blocks.filter(item => item.length > 0),
+          };
+        });
+
+        if (days.length > 0 && days[0].items.length > 0) {
+          console.log('✅ Found', days.length, 'days using pattern:', pattern);
+          break;
+        }
+      }
+    }
+
+    // Fallback: if no days found, treat entire text as one day
+    if (days.length === 0 || days.every(d => d.items.length === 0)) {
+      console.log('⚠️ No day pattern found, using fallback');
+      const allLines = mainText
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 10 && line.length < 500);
+
+      days = [{
+        title: 'Itinerary',
+        items: allLines
+      }];
+    }
 
     const costLines = costText
       ? costText
         .split('\n')
-        .map((line) => line.replace(/^[-•🌟]/, '').trim())
-        .filter((line) => line.length > 3 && line.includes('₹'))
+        .map((line) => line.replace(/^[-•🌟\*\#]+/, '').replace(/\*\*/g, '').trim())
+        .filter((line) => line.length > 3 && (line.includes('₹') || line.includes('Rs') || line.includes('INR')))
       : [];
 
+    console.log('📊 Parsed:', days.length, 'days,', costLines.length, 'cost items');
     return { days, costSummary: costLines };
   };
 
