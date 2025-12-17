@@ -144,48 +144,56 @@ ${dayFormatText}
 After the itinerary, add a detailed Cost Summary (with breakdowns for transport, food, tickets, shopping, etc.) and a "Local Tips & Warnings" section with any extra advice for this trip.
 `;
 
-    const tryDirectGemini = async () => {
-      const key = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!key) throw new Error('Missing VITE_GEMINI_API_KEY');
-      const r = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-        }
-      );
-      const raw2 = await r.text();
-      let res2 = null;
-      try { res2 = raw2 ? JSON.parse(raw2) : null; } catch (_) { res2 = { raw: raw2 }; }
-      if (!r.ok) {
-        const msg = res2?.error?.message || `Gemini error (${r.status})`;
-        throw new Error(msg);
-      }
-      return res2;
-    };
-
+    // Direct Gemini API call (skip serverless function)
     try {
       setLoading(true);
       setNotification({ type: '', message: '' });
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-      });
+      
+      const key = import.meta.env.VITE_GEMINI_API_KEY;
+      console.log('🔑 API Key present:', !!key);
+      
+      if (!key) {
+        throw new Error('Missing VITE_GEMINI_API_KEY environment variable');
+      }
 
-      // Safely parse body (may be empty on 404)
+      console.log('🚀 Calling Gemini API...');
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            contents: [{ 
+              parts: [{ text: prompt }] 
+            }] 
+          }),
+        }
+      );
+
+      console.log('📡 Response status:', response.status);
+      
       const raw = await response.text();
+      console.log('📦 Raw response length:', raw.length);
+      
       let result = null;
-      try { result = raw ? JSON.parse(raw) : null; } catch (_) { result = { raw }; }
+      try { 
+        result = raw ? JSON.parse(raw) : null; 
+      } catch (e) { 
+        console.error('❌ JSON parse error:', e);
+        result = { raw }; 
+      }
 
       if (!response.ok) {
-        // Fallback to direct Gemini
-        result = await tryDirectGemini();
+        const errorMsg = result?.error?.message || `Gemini API error (${response.status})`;
+        console.error('❌ API Error:', errorMsg);
+        throw new Error(errorMsg);
       }
+
       const text =
         result?.candidates?.[0]?.content?.parts?.[0]?.text ||
         '❌ Failed to generate.';
+      
+      console.log('✅ Generated text length:', text.length);
       setAiResponse(text);
 
       const { days, costSummary } = formatAIResponse(text);
@@ -209,8 +217,10 @@ After the itinerary, add a detailed Cost Summary (with breakdowns for transport,
     } catch (err) {
       console.error('❌ Gemini API Error:', err);
       setAiResponse('❌ Error generating itinerary.');
-      const hint = ' Falling back failed. Check your key or network.';
-      setNotification({ type: 'error', message: (err?.message || 'Error generating itinerary.') + hint });
+      setNotification({ 
+        type: 'error', 
+        message: `Error: ${err?.message || 'Failed to generate itinerary'}` 
+      });
     } finally {
       setLoading(false);
     }
