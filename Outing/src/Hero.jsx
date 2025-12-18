@@ -5,206 +5,281 @@ import { useNavigate } from "react-router-dom";
 const Hero = () => {
   const navigate = useNavigate();
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+    }
+  };
+
   return (
     <div className="w-full">
-      {/* --- HERO SECTION --- */}
-      <section className="relative min-h-[85vh] flex flex-col items-center justify-center pt-12 pb-24 px-4 overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-1/4 -left-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-pink-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+      {/* 🚀 IMMERSIVE HERO SECTION */}
+      <section className="relative min-h-[95vh] flex items-center justify-center px-4 overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/hero-bg.png"
+            alt="Hero Background"
+            className="w-full h-full object-cover scale-105 animate-zoom-slow"
+          />
+          <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/20 to-slate-950" />
+        </div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative z-10 text-center max-w-5xl"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="relative z-10 text-center max-w-6xl"
         >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-sm font-semibold mb-8 backdrop-blur-sm"
-          >
-            <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-ping" />
-            AI-Powered Travel Planning
+          <motion.div variants={itemVariants} className="mb-8 inline-block">
+            <span className="px-6 py-2 rounded-full glass-ui border-white/20 text-white text-sm font-black tracking-widest uppercase">
+              ✨ The Future of Travel is Here
+            </span>
           </motion.div>
 
           <motion.h1
-            className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-tight mb-8"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            variants={itemVariants}
+            className="text-6xl sm:text-8xl md:text-9xl font-black text-white leading-[0.9] tracking-tighter mb-8"
           >
-            Craft Your Next <br />
-            <span className="navbar-logo-gradient animate-gradient-text">Masterpiece Trip</span>
+            Escape the <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-400 animate-gradient-text">
+              Ordinary
+            </span>
           </motion.h1>
 
           <motion.p
-            className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed mb-12 font-medium"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            variants={itemVariants}
+            className="text-xl md:text-2xl text-slate-200 max-w-3xl mx-auto leading-relaxed mb-12 font-medium opacity-90"
           >
-            Leave the logistics to us. Out world-class AI engine generates hyper-personalized,
-            realistic itineraries that transform your weekends into unforgettable stories.
+            Unleash the power of elite AI to architect journeys that resonate with your soul.
+            Hyper-personalized, high-performance planning for the modern explorer.
           </motion.p>
 
-          <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <button
               onClick={() => navigate('/planner')}
-              className="px-8 py-4 rounded-2xl bg-indigo-600 text-white font-bold text-xl shadow-2xl shadow-indigo-500/20 hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-3 group"
+              className="btn-premium btn-premium-primary text-xl px-12"
             >
-              Start Planning Now
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+              Start Planning
+              <span className="text-2xl">✨</span>
             </button>
             <button
-              onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-              className="px-8 py-4 rounded-2xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xl hover:bg-white/80 transition-all"
+              onClick={() => document.getElementById('discover').scrollIntoView({ behavior: 'smooth' })}
+              className="px-10 py-4 rounded-2xl border-2 border-white/30 text-white font-bold text-xl hover:bg-white/10 transition-all backdrop-blur-md"
             >
-              See How It Works
+              Explore Library
             </button>
           </motion.div>
         </motion.div>
+
+        {/* Floating Indicator */}
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
+          onClick={() => document.getElementById('stats').scrollIntoView({ behavior: 'smooth' })}
+        >
+          <span className="text-white text-[10px] font-black uppercase tracking-widest">Scroll to Discover</span>
+          <div className="w-1 h-12 rounded-full bg-gradient-to-b from-white to-transparent" />
+        </motion.div>
       </section>
 
-      {/* --- FEATURES GRID --- */}
-      <section className="py-24 px-4 sm:px-12 relative">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">The Future of Travel</h2>
-            <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
-              We combined cutting-edge artificial intelligence with premium design to give you
-              the ultimate outing experience.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* 📊 LIVE STATISTICS SECTION */}
+      <section id="stats" className="section-padding relative bg-slate-950 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
             {[
-              {
-                title: "Gen-AI Engine",
-                desc: "Powered by Gemini 2.5 Flash for hyper-realistic and fact-checked travel suggestions.",
-                icon: "⚡",
-                color: "bg-blue-500"
-              },
-              {
-                title: "Premium Prints",
-                desc: "Export your masterpiece plans into beautifully formatted PDF guides in one click.",
-                icon: "📄",
-                color: "bg-pink-500"
-              },
-              {
-                title: "Total Control",
-                desc: "Adjust group sizes, budget ranges, and time windows for a plan that truly fits you.",
-                icon: "🎛️",
-                color: "bg-amber-500"
-              }
-            ].map((feat, i) => (
+              { label: "Successful Trips", value: "12,400+", icon: "🚀" },
+              { label: "Unique Routes", value: "8,500+", icon: "🧭" },
+              { label: "Happy Travelers", value: "45k+", icon: "👥" },
+              { label: "AI Iterations", value: "1.2M", icon: "🧠" }
+            ].map((stat, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="glass-card p-10 group"
+                className="text-center group"
               >
-                <div className={`w-14 h-14 rounded-2xl ${feat.color} bg-opacity-10 text-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  {feat.icon}
-                </div>
-                <h3 className="text-2xl font-bold mb-3">{feat.title}</h3>
-                <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">
-                  {feat.desc}
-                </p>
+                <div className="text-4xl mb-4 group-hover:scale-125 transition-transform duration-500">{stat.icon}</div>
+                <h4 className="text-5xl font-black text-white mb-2 leading-none">{stat.value}</h4>
+                <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">{stat.label}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* --- STEPS SECTION --- */}
-      <section className="py-24 bg-indigo-600/5 dark:bg-indigo-500/5 relative overflow-hidden">
+      {/* 🏝️ CURATED DESTINATIONS */}
+      <section id="discover" className="section-padding bg-slate-50 dark:bg-slate-900/50">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">
-                From Idea to Itinerary <br />
-                <span className="text-indigo-600">In Seconds</span>
-              </h2>
-              <div className="space-y-12">
-                {[
-                  { step: "01", title: "Share Your Vision", text: "Tell us where you want to go and what you love." },
-                  { step: "02", title: "AI Magic Happens", text: "Our engine crafts a localized, balanced, and smart plan." },
-                  { step: "03", title: "Live the Story", text: "Save it, share it, or hit the road immediately." }
-                ].map((item, i) => (
-                  <div key={i} className="flex gap-6">
-                    <span className="text-3xl font-black text-indigo-200 dark:text-indigo-900/40 tabular-nums">
-                      {item.step}
-                    </span>
-                    <div>
-                      <h4 className="text-2xl font-bold mb-2">{item.title}</h4>
-                      <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">{item.text}</p>
-                    </div>
-                  </div>
-                ))}
+          <div className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8">
+            <div className="max-w-2xl">
+              <span className="text-indigo-600 font-black uppercase tracking-widest text-sm mb-4 block">Curated Collections</span>
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter">Your Next Masterpiece <br /> <span className="text-slate-400">Awaits Discovery</span></h2>
+            </div>
+            <p className="text-slate-500 text-lg font-medium max-w-xs">
+              Hand-picked by our AI from over 10,000 global destinations for their unique soul and atmosphere.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* Destination 1 */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="group relative h-[600px] rounded-[3rem] overflow-hidden cursor-pointer shadow-2xl hover:shadow-indigo-500/20 transition-all duration-700"
+            >
+              <img src="/dest-santorini.png" alt="Santorini" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-0 left-0 p-12 w-full">
+                <span className="px-4 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-black uppercase tracking-tighter mb-4 inline-block">Trending #1</span>
+                <h3 className="text-5xl font-black text-white mb-4">Ethereal Santorini</h3>
+                <p className="text-slate-200 text-lg font-medium max-w-sm mb-8">Architected for romance and historical discovery on the edge of the Aegean.</p>
+                <div className="flex items-center gap-6 text-white font-bold">
+                  <span className="flex items-center gap-2">📍 Greece</span>
+                  <span className="flex items-center gap-2">⏱️ 5-7 Days</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Destination 2 */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="group relative h-[600px] rounded-[3rem] overflow-hidden cursor-pointer shadow-2xl hover:shadow-fuchsia-500/20 transition-all duration-700"
+            >
+              <img src="/dest-alps.png" alt="Alps" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-0 left-0 p-12 w-full">
+                <span className="px-4 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-black uppercase tracking-tighter mb-4 inline-block">Exotic Pick</span>
+                <h3 className="text-5xl font-black text-white mb-4">Alpine Sanctuary</h3>
+                <p className="text-slate-200 text-lg font-medium max-w-sm mb-8">High-performance relaxation in the heart of the Swiss mountains.</p>
+                <div className="flex items-center gap-6 text-white font-bold">
+                  <span className="flex items-center gap-2">📍 Switzerland</span>
+                  <span className="flex items-center gap-2">⏱️ 3-5 Days</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* 🧠 FEATURES SHOWCASE */}
+      <section className="section-padding relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-20 lg:mb-32">
+            <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 italic outline-text">The Architecture of Adventure</h2>
+            <div className="w-24 h-2 bg-indigo-600 mx-auto rounded-full" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+            {[
+              { title: "Precision AI", desc: "Our engine analyzes over 500 signals to verify safety, distance, and local authenticity.", icon: "⚡" },
+              { title: "Dynamic Logic", desc: "Itineraries that breathe. We balance intensity with moments of silent discovery.", icon: "🏮" },
+              { title: "Global Sync", desc: "Instantly share, download, or sync your masterpiece across any digital device.", icon: "🌐" }
+            ].map((f, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ scale: 1.02 }}
+                className="relative group p-1 w-full"
+              >
+                <div className="relative z-10 glass-card p-12 h-full border-slate-200/50 flex flex-col items-center text-center">
+                  <div className="text-6xl mb-8 transform group-hover:rotate-12 transition-transform duration-500">{f.icon}</div>
+                  <h3 className="text-3xl font-black mb-4 tracking-tight">{f.title}</h3>
+                  <p className="text-slate-500 text-lg leading-relaxed font-medium">{f.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 💬 TESTIMONIALS (WORLD-CLASS) */}
+      <section className="section-padding bg-slate-950 text-white relative">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col lg:flex-row gap-20 items-center">
+            <div className="lg:w-1/2">
+              <h2 className="text-6xl font-black leading-[0.9] mb-8 tracking-tighter">Trusted by Over <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">45,000 Travelers</span> Worldwide</h2>
+              <div className="flex items-center gap-12 text-slate-400 font-bold">
+                <div className="flex flex-col">
+                  <span className="text-3xl text-white font-black">4.9/5</span>
+                  <span className="text-xs uppercase tracking-widest">Global Rating</span>
+                </div>
+                <div className="w-px h-12 bg-slate-800" />
+                <div className="flex flex-col">
+                  <span className="text-3xl text-white font-black">200+</span>
+                  <span className="text-xs uppercase tracking-widest">Cities Covered</span>
+                </div>
               </div>
             </div>
 
-            <div className="relative">
+            <div className="lg:w-1/2">
               <motion.div
-                initial={{ rotate: -5, opacity: 0, x: 50 }}
-                whileInView={{ rotate: 0, opacity: 1, x: 0 }}
-                className="glass-card p-4 md:p-8 bg-white dark:bg-slate-800 shadow-3xl"
+                animate={{ x: [0, -20, 0] }}
+                transition={{ duration: 10, repeat: Infinity }}
+                className="glass-card bg-white/5 border-white/10 p-12 relative"
               >
-                <div className="space-y-4">
-                  <div className="h-4 w-1/2 bg-slate-100 dark:bg-slate-700 rounded animate-shimmer" />
-                  <div className="h-12 w-full bg-slate-50 dark:bg-slate-700/50 rounded-xl" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl" />
-                    <div className="h-20 bg-pink-50 dark:bg-pink-500/10 rounded-xl" />
+                <div className="text-6xl absolute -top-8 -left-8 text-indigo-500 opacity-50">"</div>
+                <p className="text-2xl font-medium leading-relaxed italic mb-8">
+                  "Travelly completely redefined how I view weekend trips. The AI-generated
+                  details for my Bali escape were more accurate than most human guides I've hired."
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-slate-800" />
+                  <div>
+                    <h4 className="font-black">Magnus Carlsen</h4>
+                    <p className="text-slate-500 text-sm">Professional Explorer</p>
                   </div>
-                  <div className="h-40 bg-slate-50 dark:bg-slate-700/50 rounded-xl" />
                 </div>
               </motion.div>
-              {/* Decorative blobs */}
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-pink-400/20 rounded-full blur-[60px] -z-10" />
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-400/20 rounded-full blur-[60px] -z-10" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* --- CALL TO ACTION --- */}
-      <section className="py-32 px-4">
+      {/* 🏁 FINAL CTA */}
+      <section className="section-padding relative">
         <motion.div
-          whileHover={{ y: -5 }}
-          className="max-w-4xl mx-auto rounded-[3rem] bg-gradient-to-tr from-indigo-600 to-fuchsia-600 p-12 md:p-20 text-center text-white shadow-2xl shadow-indigo-500/40 relative overflow-hidden"
+          initial={{ scale: 0.9, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ once: true }}
+          className="max-w-5xl mx-auto glass-card bg-indigo-600 p-16 md:p-24 text-center text-white relative overflow-hidden shadow-[0_50px_100px_-20px_rgba(79,70,229,0.4)]"
         >
-          <div className="absolute top-0 right-0 p-10 opacity-10 rotate-12">
-            <svg width="200" height="200" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
-            </svg>
-          </div>
+          {/* Animated Glow */}
+          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white/10 blur-[120px] rounded-full animate-float" />
 
-          <h2 className="text-4xl md:text-6xl font-black mb-8">Ready for Adventure?</h2>
-          <p className="text-indigo-100 text-xl md:text-2xl mb-12 max-w-2xl mx-auto opacity-90">
-            Join thousands of travelers who have already upgraded their weekend game.
+          <h2 className="text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-none">Ready to Begin <br /> Your Story?</h2>
+          <p className="text-indigo-100 text-xl md:text-2xl mb-12 max-w-2xl mx-auto font-medium opacity-90">
+            Join the elite circle of travelers who never settle for generic plans.
           </p>
           <button
             onClick={() => navigate('/planner')}
-            className="px-10 py-5 rounded-2xl bg-white text-indigo-600 font-black text-2xl hover:bg-opacity-90 hover:scale-[1.05] transition-all shadow-xl"
+            className="px-12 py-5 rounded-2xl bg-white text-indigo-600 font-black text-2xl hover:scale-110 active:scale-95 transition-all shadow-2xl"
           >
-            Create My Plan
+            Create My Masterpiece 🚀
           </button>
         </motion.div>
       </section>
     </div>
   );
-}
+};
 
 export default Hero;

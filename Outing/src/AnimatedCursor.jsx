@@ -1,4 +1,5 @@
-
+import React, { useState, useEffect } from 'react';
+import { motion, useMotionValue } from 'framer-motion';
 
 // Utility: checks if an element is clickable
 const isClickable = (el) => {
@@ -49,14 +50,12 @@ const StarSVG = ({ style, opacity, size = BASE_STAR_SIZE }) => (
 );
 
 const AnimatedCursor = () => {
-  const [isActive, setIsActive] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [trail, setTrail] = useState([]); // [{x, y, time}]
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
   useEffect(() => {
-    let animationFrame;
     const updateTrail = (e) => {
       const now = Date.now();
       setTrail((prev) =>
@@ -71,27 +70,31 @@ const AnimatedCursor = () => {
     document.addEventListener('mousemove', updateTrail);
     return () => {
       document.removeEventListener('mousemove', updateTrail);
-      cancelAnimationFrame(animationFrame);
     };
   }, [mouseX, mouseY]);
 
   useEffect(() => {
     document.body.style.cursor = 'none';
+    const hideCursor = () => setIsVisible(false);
+    const showCursor = () => setIsVisible(true);
+    document.addEventListener('mouseleave', hideCursor);
+    document.addEventListener('mouseenter', showCursor);
     return () => {
       document.body.style.cursor = '';
+      document.removeEventListener('mouseleave', hideCursor);
+      document.removeEventListener('mouseenter', showCursor);
     };
   }, []);
 
   if (!isVisible) return null;
 
-  // Render trail stars
   const now = Date.now();
   return (
     <>
       {trail.map((point, idx) => {
         const age = now - point.time;
         const opacity = Math.max(0, 1 - age / TRAIL_FADE_DURATION);
-        const size = BASE_STAR_SIZE - idx * 0.3; // Slightly bigger with trail
+        const size = BASE_STAR_SIZE - idx * 0.3;
         return (
           <motion.div
             key={point.time + '-' + idx}
@@ -105,10 +108,8 @@ const AnimatedCursor = () => {
               height: size,
               opacity,
               filter: `drop-shadow(0 0 14px #5ab6ff)`,
-              transition: 'opacity 0.2s',
             }}
             animate={{ opacity }}
-            exit={{ opacity: 0 }}
           >
             <StarSVG opacity={opacity} size={size} />
           </motion.div>
@@ -118,3 +119,4 @@ const AnimatedCursor = () => {
   );
 };
 
+export default AnimatedCursor;

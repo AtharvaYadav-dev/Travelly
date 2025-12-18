@@ -97,7 +97,7 @@ const Profile = () => {
                 value={form.fullName}
                 onChange={handleChange}
                 placeholder="Enter your name"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all"
+                className="premium-input pl-10"
               />
             </div>
           </div>
@@ -112,7 +112,7 @@ const Profile = () => {
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="Enter phone number"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all"
+                className="premium-input pl-10"
               />
             </div>
           </div>
@@ -127,7 +127,7 @@ const Profile = () => {
                 value={form.avatarUrl}
                 onChange={handleChange}
                 placeholder="Link to your profile picture"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition-all"
+                className="premium-input pl-10"
               />
             </div>
           </div>

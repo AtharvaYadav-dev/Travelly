@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
 import { supabase } from './supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Signup = () => {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  const handleSignup = async () => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg('');
+
     if (!fullName || !phone || !email || !password) {
-      setErrorMsg('Please fill in all fields');
+      setErrorMsg('All sectors must be populated.');
+      setLoading(false);
       return;
     }
 
@@ -29,69 +36,115 @@ const Signup = () => {
 
     if (error) {
       setErrorMsg(error.message);
+      setLoading(false);
     } else {
-      alert('Signup successful! Now login.');
+      alert('Registration Protocol Complete. Proceed to login.');
       navigate('/login');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 via-white to-purple-100 transition-all duration-500">
-      <div className="flex w-full max-w-3xl shadow-2xl rounded-3xl overflow-hidden bg-white">
-        {/* Left Accent Side */}
-        <div className="hidden md:flex flex-col items-center justify-center w-1/2 bg-gradient-to-br from-green-500 to-purple-500 p-8 text-white relative">
-          <svg width="120" height="120" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-6 animate-bounce">
-            <circle cx="60" cy="60" r="60" fill="#fff2" />
-            <path d="M40 80 Q60 60 80 80" stroke="#fff" strokeWidth="4" fill="none" />
-            <circle cx="60" cy="55" r="8" fill="#fff" />
-          </svg>
-          <h2 className="text-2xl font-bold mb-2">Join Us!</h2>
-          <p className="text-center opacity-80">Create your account to start planning amazing outings.</p>
+    <div className="min-h-[95vh] flex items-center justify-center p-4 py-20 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full -z-10 bg-slate-50 dark:bg-slate-900" />
+      <div className="absolute top-1/4 -right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '3s' }} />
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card w-full max-w-2xl p-10 md:p-16 border-white/50 backdrop-blur-3xl shadow-[0_60px_120px_-30px_rgba(0,0,0,0.15)]"
+      >
+        <div className="text-center mb-12">
+          <Link to="/" className="inline-block group mb-8">
+            <div className="w-16 h-16 bg-slate-900 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-2xl group-hover:rotate-[-12deg] transition-transform">
+              <span className="text-white text-3xl font-black italic">T</span>
+            </div>
+          </Link>
+          <h2 className="text-5xl font-black tracking-tighter mb-4 italic">Begin Your <span className="navbar-logo-gradient animate-gradient-text">Odyssey</span></h2>
+          <p className="text-slate-500 font-medium tracking-tight">Register your credentials to access world-class AI travel architecture.</p>
         </div>
-        {/* Right Form Side */}
-        <div className="flex-1 p-8 flex flex-col justify-center">
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Sign Up</h2>
-          {errorMsg && <p className="text-red-500 mb-3 text-center animate-pulse">{errorMsg}</p>}
-          <input
-            type="text"
-            placeholder="Full Name"
-            className="p-3 border border-gray-300 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Phone Number"
-            className="p-3 border border-gray-300 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-          <input
-            type="email"
-            placeholder="Gmail ID"
-            className="p-3 border border-gray-300 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="p-3 border border-gray-300 w-full mb-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button
-            onClick={handleSignup}
-            className="bg-green-600 text-white py-3 w-full rounded-lg font-semibold shadow hover:bg-green-700 transition-all duration-200"
+
+        {errorMsg && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-10 p-5 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-black flex items-center gap-4"
           >
-            Sign Up
+            <span className="text-xl">⚠️</span> {errorMsg}
+          </motion.div>
+        )}
+
+        <form onSubmit={handleSignup} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Full Identity</label>
+            <input
+              type="text"
+              placeholder="Commander Doe"
+              className="premium-input"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Comm Link (Phone)</label>
+            <input
+              type="text"
+              placeholder="+91 00000 00000"
+              className="premium-input"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-3 col-span-2">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Archive ID (Email)</label>
+            <input
+              type="email"
+              placeholder="you@masterpiece.com"
+              className="premium-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-3 col-span-2">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Security Key</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              className="premium-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-premium btn-premium-primary w-full col-span-2 py-5 text-xl mt-4"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-3">
+                <span className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Processing...</span>
+              </div>
+            ) : (
+              'Initialize Deployment 🔱'
+            )}
           </button>
-          <p className="mt-6 text-center text-gray-500 text-sm">
-            Already have an account?{' '}
-            <a href="/login" className="text-green-600 hover:underline font-medium">Login</a>
-          </p>
-        </div>
-      </div>
+        </form>
+
+        <p className="mt-12 text-center text-slate-500 font-bold text-sm tracking-tight">
+          Already archived?{' '}
+          <Link to="/login" className="text-indigo-600 hover:underline">Sign In</Link>
+        </p>
+      </motion.div>
     </div>
   );
 };

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from './supabase';
+import { supabase, isSupabaseConfigured } from './supabase';
 import { useNavigate } from 'react-router-dom';
 import Notification from './Notification';
 import FAB from './FAB';
-import Lottie from 'lottie-react';
-import travelLoader from './lottie-travel-loader.json';
+import Loader from './Loader';
 
 const Result = () => {
   const [formattedResponse, setFormattedResponse] = useState([]);
@@ -18,7 +17,7 @@ const Result = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const onScroll = () => setShowFab(window.scrollY > 200);
+    const onScroll = () => setShowFab(window.scrollY > 400);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -26,16 +25,16 @@ const Result = () => {
   const handleCopyPlan = async () => {
     try {
       const text = aiResponse || (formattedResponse.length > 0
-        ? formattedResponse.map(d => `${d.title}\n${d.items.map(i => `- ${i}`).join('\n')}`).join('\n\n') + (costSummary.length ? `\n\nCost Summary:\n${costSummary.map(i => `- ${i}`).join('\n')}` : '')
+        ? formattedResponse.map(d => `--- ${d.title} ---\n${d.items.map(i => `• ${i}`).join('\n')}`).join('\n\n') + (costSummary.length ? `\n\n💰 Finance Summary:\n${costSummary.map(i => `• ${i}`).join('\n')}` : '')
         : '');
       if (!text) {
-        setNotification({ type: 'error', message: 'Nothing to copy yet.' });
+        setNotification({ type: 'error', message: 'Mission data not found.' });
         return;
       }
       await navigator.clipboard.writeText(text);
-      setNotification({ type: 'success', message: 'Plan copied to clipboard!' });
+      setNotification({ type: 'success', message: 'Itinerary archived to clipboard!' });
     } catch (e) {
-      setNotification({ type: 'error', message: 'Failed to copy plan.' });
+      setNotification({ type: 'error', message: 'Sync failed.' });
     }
   };
 
@@ -45,141 +44,81 @@ const Result = () => {
       setSavedData(saved);
       generateAI(saved);
     } else {
-      setAiResponse('No itinerary found.');
+      setAiResponse('No transmission found.');
       setLoading(false);
     }
   }, []);
 
   const formatAIResponse = (text) => {
     if (!text) return { days: [], costSummary: [] };
-    console.log('📝 Formatting AI response, length:', text.length);
-
     const cleanText = text.replace(/<[^>]*>/g, '');
     const [mainText, costText] = cleanText.split(/Cost Summary:/i);
 
-    const dayPatterns = [
-      /Day\s*\d+/gi,
-      /\*\*Day\s*\d+\*\*/gi,
-      /##\s*Day\s*\d+/gi,
-      /Day\s+\d+:/gi,
-    ];
-
+    const dayPatterns = [/Day\s*\d+/gi, /\*\*Day\s*\d+\*\*/gi, /##\s*Day\s*\d+/gi, /Day\s+\d+:/gi];
     let days = [];
 
     for (const pattern of dayPatterns) {
       const splits = mainText.split(pattern).filter(Boolean);
       if (splits.length >= 1) {
         days = splits.map((day, index) => {
-          const blocks = day
-            .split('\n')
-            .map((line) =>
-              line
-                .replace(/^[\*\#\-•🌟]+/, '')
-                .replace(/\*\*/g, '')
-                .trim()
-            )
+          const blocks = day.split('\n')
+            .map((line) => line.replace(/^[\*\#\-•🌟]+/, '').replace(/\*\*/g, '').trim())
             .filter((line) => line.length > 2);
-
-          return {
-            title: `Day ${index + 1}`,
-            items: blocks.filter(item => item.length > 0),
-          };
+          return { title: `Day ${index + 1}`, items: blocks };
         });
-
-        if (days.length > 0 && days.some(d => d.items.length > 0)) {
-          break;
-        }
+        if (days.length > 0 && days.some(d => d.items.length > 0)) break;
       }
     }
 
-    if (days.length === 0 || days.every(d => d.items.length === 0)) {
-      const allLines = (mainText || text)
-        .split('\n')
-        .map(line => line.trim()
-          .replace(/^[\*\#\-•🌟]+/, '')
-          .replace(/\*\*/g, '')
-          .trim()
-        )
-        .filter(line => line.length > 2);
-
-      days = [{
-        title: 'Your Itinerary',
-        items: allLines.length > 0 ? allLines : [text.substring(0, 1000)]
-      }];
+    if (days.length === 0) {
+      days = [{ title: 'Your Itinerary', items: [text.substring(0, 1000)] }];
     }
 
-    const costLines = costText
-      ? costText
-        .split('\n')
-        .map((line) => line.replace(/^[-•🌟\*\#]+/, '').replace(/\*\*/g, '').trim())
-        .filter((line) => line.length > 2)
-      : [];
-
+    const costLines = costText ? costText.split('\n').map((line) => line.replace(/^[-•🌟\*\#]+/, '').replace(/\*\*/g, '').trim()).filter((line) => line.length > 2) : [];
     return { days, costSummary: costLines };
   };
 
   const generateAI = async (data) => {
     const start = new Date(data.startDate);
     const end = new Date(data.endDate);
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    const totalDays = diffDays > 7 ? 7 : diffDays;
+    const totalDays = Math.min(7, Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1);
 
-    let dayFormatText = '';
-    for (let i = 1; i <= totalDays; i++) {
-      dayFormatText += `
-Day ${i}
-- [HH:MM AM/PM] Activity name: Description. (Estimated Cost: ₹X)
-`;
-    }
-
-    const prompt = `
-You are a luxury travel concierge. Create a detailed, professional ${totalDays}-day itinerary for ${data.participants} people in ${data.location}.
+    const prompt = `You are a high-end travel architect. Create a detailed ${totalDays}-day luxury itinerary for ${data.participants} people in ${data.location}.
 Title: ${data.title}
 Budget: ₹${data.budget}
-Interests: ${data.type}
+Type: ${data.type}
 Range: ${data.range}
 
-Instructions:
-1. For each day, provide 4-5 distinct activities with specific times.
-2. Use the format: "- [Time] Activity: Detail. (Cost: ₹X)"
-3. Ensure costs are realistic and stay within the total ₹${data.budget} budget.
-4. Include local dining gems and hidden spots.
-5. End with a "Cost Summary:" section.
-
-FORMAT:
-${dayFormatText}
-`;
+Structure each day with 4-5 items using: "- [Time] Activity: Detail. (Cost: ₹X)"
+Stay within total ₹${data.budget}. Include secret local spots.
+End with "Cost Summary:".`;
 
     try {
       setLoading(true);
       const key = import.meta.env.VITE_GEMINI_API_KEY;
       if (!key) throw new Error('API Key missing');
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-          }),
-        }
-      );
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+      });
 
       const result = await response.json();
-      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Failed to generate.';
-      setAiResponse(text);
+      if (result.error) throw new Error(result.error.message);
 
+      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error('No response from AI brain.');
+
+      setAiResponse(text);
       const { days, costSummary } = formatAIResponse(text);
       setFormattedResponse(days);
       setCostSummary(costSummary);
 
-      if (data.id) {
+      if (data.id && isSupabaseConfigured) {
         await supabase.from('itineraries').update({ ai_plan: text }).eq('id', data.id);
       }
     } catch (err) {
-      setAiResponse('❌ Error generating itinerary.');
       setNotification({ type: 'error', message: err.message });
     } finally {
       setLoading(false);
@@ -187,171 +126,196 @@ ${dayFormatText}
   };
 
   const handleDownloadPDF = () => {
-    import('jspdf').then(jsPDFModule => {
-      const doc = new jsPDFModule.jsPDF();
-      doc.setFont('helvetica');
-      doc.setFontSize(22);
-      doc.text(savedData?.title || 'Trip Plan', 105, 25, { align: 'center' });
-      let y = 40;
-      formattedResponse.forEach((day) => {
-        doc.setFontSize(16);
-        doc.setTextColor(99, 102, 241);
-        doc.text(day.title, 14, y);
-        y += 10;
-        doc.setFontSize(11);
-        doc.setTextColor(60, 60, 60);
-        day.items.forEach(item => {
-          if (y > 270) { doc.addPage(); y = 20; }
-          const lines = doc.splitTextToSize(`• ${item}`, 180);
+    import('jspdf').then(m => {
+      const doc = new m.jsPDF();
+      doc.setFontSize(24).text(savedData?.title || 'Trip Plan', 105, 20, { align: 'center' });
+      let y = 35;
+      formattedResponse.forEach(d => {
+        doc.setFontSize(16).setTextColor(99, 102, 241).text(d.title, 14, y);
+        y += 8;
+        doc.setFontSize(10).setTextColor(50, 50, 50);
+        d.items.forEach(i => {
+          if (y > 270) { doc.addPage(); y = 15; }
+          const lines = doc.splitTextToSize(`• ${i}`, 180);
           doc.text(lines, 18, y);
-          y += lines.length * 6 + 2;
+          y += lines.length * 5 + 2;
         });
-        y += 5;
+        y += 8;
       });
-      doc.save(`${savedData?.title || 'Trip'}-Plan.pdf`);
+      doc.save(`${savedData?.title}-Guide.pdf`);
     });
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12">
+    <div className="w-full">
       <Notification
         type={notification.type}
         message={notification.message}
         onClose={() => setNotification({ type: '', message: '' })}
       />
 
-      {/* --- HEADER --- */}
-      <div className="text-center mb-16">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="inline-block px-4 py-1 rounded-full bg-indigo-500/10 text-indigo-600 text-sm font-bold mb-4"
-        >
-          ✨ AI Generated Expert Plan
-        </motion.div>
-        <motion.h2
-          className="text-4xl md:text-6xl font-black tracking-tight mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          Your <span className="navbar-logo-gradient animate-gradient-text">Premium Itinerary</span>
-        </motion.h2>
+      {/* --- MASTER HERO --- */}
+      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-slate-950">
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950" />
+          <div className="mesh-bg !opacity-20" />
+        </div>
 
-        <div className="flex flex-wrap justify-center gap-3">
-          <button onClick={() => navigate('/planner')} className="px-5 py-2.5 rounded-xl glass-ui font-bold hover:scale-105 transition-all flex items-center gap-2">
-            <span>🔙</span> Modify
+        <div className="relative z-10 text-center px-4 max-w-5xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 inline-block">
+            <span className="px-5 py-1.5 rounded-full glass-ui border-white/10 text-white text-[10px] font-black uppercase tracking-[0.4em]">Intelligence Report</span>
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-6xl md:text-9xl font-black text-white tracking-tighter mb-8 italic"
+          >
+            {savedData?.title || 'Mission Alpha'}
+          </motion.h1>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="flex flex-wrap justify-center gap-8 text-white font-black uppercase tracking-widest text-xs">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-slate-500">Destination</span>
+              <span>{savedData?.location || 'Unknown'}</span>
+            </div>
+            <div className="w-px h-10 bg-white/10 hidden sm:block" />
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-slate-500">Inventory</span>
+              <span>₹{savedData?.budget || '0'}</span>
+            </div>
+            <div className="w-px h-10 bg-white/10 hidden sm:block" />
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-slate-500">Unit Size</span>
+              <span>{savedData?.participants || '1'} PAX</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* --- TOOLBAR --- */}
+      <div className="sticky top-20 z-40 w-full glass-ui py-4 border-b border-indigo-500/10 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center items-center gap-6">
+          <button onClick={() => navigate('/planner')} className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors">
+            <span className="text-xl">🛠️</span> Configure
           </button>
-          <button onClick={handleDownloadPDF} className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:scale-105 transition-all flex items-center gap-2">
-            <span>⬇️</span> Download PDF
+          <button onClick={handleDownloadPDF} className="btn-premium py-2.5 px-6 bg-slate-900 text-white text-xs tracking-widest uppercase font-black shadow-none ring-1 ring-white/10">
+            Download Dossier
           </button>
-          <button onClick={handleCopyPlan} className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 shadow-sm font-bold hover:scale-105 transition-all flex items-center gap-2">
-            <span>📋</span> Copy
+          <button onClick={handleCopyPlan} className="btn-premium py-2.5 px-6 glass-ui text-xs tracking-widest uppercase font-black border-slate-200">
+            Sync to Device
           </button>
-          <button onClick={() => savedData && generateAI(savedData)} disabled={loading} className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50">
-            {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span>🔄</span>}
-            Regenerate
+          <button onClick={() => savedData && generateAI(savedData)} disabled={loading} className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 flex items-center gap-2 disabled:opacity-50">
+            {loading ? 'Processing...' : 'Recalibrate'} <span className="text-xl">🔄</span>
           </button>
         </div>
       </div>
 
-      {/* --- CONTENT --- */}
-      {loading ? (
-        <div className="flex flex-col items-center py-20">
-          <div className="w-24 h-24 border-8 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-8" />
-          <p className="text-2xl font-bold text-slate-400 animate-pulse">Designing your adventure...</p>
-        </div>
-      ) : formattedResponse.length > 0 ? (
-        <div className="space-y-12">
-          {formattedResponse.map((day, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="relative pl-8 md:pl-12 border-l-4 border-indigo-500/20 py-4"
-            >
-              {/* Day Marker */}
-              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-500/40">
-                {i + 1}
-              </div>
+      <div className="max-w-7xl mx-auto px-4 py-24">
+        {loading ? (
+          <Loader message="Synthesizing Your Masterpiece..." />
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-16">
+            {/* Timeline Left */}
+            <div className="xl:col-span-8 space-y-24">
+              <motion.div initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.2 } } }}>
+                {formattedResponse.map((day, i) => (
+                  <motion.div
+                    key={i}
+                    variants={{ hidden: { opacity: 0, x: -30 }, visible: { opacity: 1, x: 0 } }}
+                    className="group"
+                  >
+                    <div className="flex items-start gap-8 mb-16">
+                      <div className="hidden md:flex flex-col items-center">
+                        <div className="w-16 h-16 rounded-[2rem] bg-indigo-600 text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/30 group-hover:rotate-12 transition-transform">
+                          {i + 1}
+                        </div>
+                        <div className="w-1 h-32 bg-gradient-to-b from-indigo-500/20 to-transparent mt-4" />
+                      </div>
 
-              <div className="glass-card p-6 md:p-10 mb-6">
-                <h3 className="text-3xl font-black mb-8 flex items-center gap-4">
-                  <span className="text-slate-300">#</span> {day.title}
-                </h3>
+                      <div className="flex-1 glass-card p-10 hover:border-indigo-500/30">
+                        <h3 className="text-4xl font-black mb-10 tracking-tighter flex items-center gap-4">
+                          <span className="text-indigo-500 opacity-30 text-2xl">Day</span>
+                          {day.title.replace(/Day\s*\d+/i, '').trim() || `Operational Phase ${i + 1}`}
+                        </h3>
 
-                <div className="space-y-8">
-                  {day.items.map((item, j) => {
-                    const timeMatch = item.match(/\[(.*?)\]/);
-                    const time = timeMatch ? timeMatch[1] : null;
-                    const content = item.replace(/\[.*?\]/, '').trim();
-                    const [activity, ...detail] = content.split(':');
+                        <div className="space-y-12">
+                          {day.items.map((item, j) => {
+                            const time = (item.match(/\[(.*?)\]/) || [])[1];
+                            const content = item.replace(/\[.*?\]/, '').trim();
+                            const [activity, ...details] = content.split(':');
 
+                            return (
+                              <div key={j} className="relative pl-6 border-l-2 border-slate-100 dark:border-slate-800">
+                                <div className="absolute -left-[5px] top-2 w-2 h-2 rounded-full bg-slate-300 group-hover:bg-indigo-500 transition-colors" />
+                                <div className="flex flex-col sm:flex-row gap-4 sm:items-start">
+                                  <div className="sm:w-32 flex-shrink-0">
+                                    <span className="text-xs font-black uppercase tracking-widest text-indigo-500">{time || '00:00'}</span>
+                                  </div>
+                                  <div>
+                                    <h4 className="text-xl font-bold mb-2 tracking-tight">{activity}</h4>
+                                    <p className="text-slate-500 text-lg leading-relaxed font-medium">{details.join(':')}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+
+            {/* Sidebar Right */}
+            <div className="xl:col-span-4 space-y-12">
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-card p-10 bg-slate-900 text-white shadow-3xl">
+                <div className="flex items-center gap-4 mb-10">
+                  <span className="text-4xl">💎</span>
+                  <h3 className="text-2xl font-black tracking-tight">Financial Analysis</h3>
+                </div>
+
+                <div className="space-y-6">
+                  {costSummary.map((item, idx) => {
+                    const [label, val] = item.split(':');
                     return (
-                      <div key={j} className="flex flex-col md:flex-row gap-4 md:gap-8 group">
-                        <div className="md:w-32 flex-shrink-0">
-                          <span className="text-lg font-black text-indigo-500 group-hover:scale-110 transition-transform inline-block">
-                            {time || '--:--'}
-                          </span>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">{activity}</h4>
-                          <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">{detail.join(':')}</p>
-                        </div>
+                      <div key={idx} className="flex justify-between items-center py-4 border-b border-white/5 last:border-0">
+                        <span className="text-slate-400 font-bold text-xs uppercase tracking-widest">{label}</span>
+                        <span className="text-xl font-black text-white">{val || item}</span>
                       </div>
                     );
                   })}
                 </div>
-              </div>
-            </motion.div>
-          ))}
 
-          {/* Cost Summary */}
-          {costSummary.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="glass-card p-8 md:p-12 border-t-8 border-emerald-500 bg-emerald-50/20"
-            >
-              <h3 className="text-3xl font-black mb-8 text-emerald-700 flex items-center gap-4">
-                <span className="text-4xl">💰</span> Cost Breakdown
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {costSummary.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-white/50 border border-emerald-100 shadow-sm">
-                    <span className="text-slate-600 font-medium">{item.split(':')[0]}</span>
-                    <span className="text-xl font-bold text-emerald-600">{item.split(':')[1] || item}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </div>
-      ) : (
-        <div className="text-center py-20">
-          <p className="text-2xl font-bold text-red-500">{aiResponse}</p>
-        </div>
-      )}
+                <div className="mt-12 p-6 rounded-2xl bg-indigo-600/20 border border-indigo-500/30">
+                  <p className="text-xs font-medium text-indigo-200 leading-relaxed italic">
+                    Finalized based on current market trends and personalized style preferences.
+                  </p>
+                </div>
+              </motion.div>
 
-      <FAB show={showFab} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} label="Scroll Top" />
+              <div className="p-8 glass-card border-slate-200/50">
+                <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Expert Verdict</h4>
+                <div className="flex gap-1 mb-4">
+                  {[1, 2, 3, 4, 5].map(i => <span key={i} className="text-indigo-600">★</span>)}
+                </div>
+                <p className="text-slate-500 font-medium leading-relaxed">
+                  "This route presents an optimal balance between cultural depth and luxury downtime.
+                  Target achieved."
+                </p>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-slate-200" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Travelly AI Concierge</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <FAB show={showFab} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} label="Archived Top" />
     </div>
   );
 };
-
-export default Result;
-
-// Floating Action Button: Show when scrolled down
-// (Add this before export default Result;)
-
-// ...inside Result component, before return:
-//   const [showFab, setShowFab] = useState(false);
-//   useEffect(() => {
-//     const onScroll = () => setShowFab(window.scrollY > 200);
-//     window.addEventListener('scroll', onScroll);
-//     return () => window.removeEventListener('scroll', onScroll);
-//   }, []);
-
-// ...inside JSX, after main content:
-//   <FAB show={showFab} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} label="Scroll to Top" />
 
 export default Result;

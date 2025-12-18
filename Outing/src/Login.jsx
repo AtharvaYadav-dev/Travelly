@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { supabase } from './supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg('');
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -16,55 +21,93 @@ const Login = () => {
 
     if (error) {
       setErrorMsg(error.message);
+      setLoading(false);
     } else {
-      alert('Login successful!');
-      navigate('/planner'); // ✅ Route must exist
+      navigate('/planner');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-purple-100 transition-all duration-500">
-      <div className="flex w-full max-w-3xl shadow-2xl rounded-3xl overflow-hidden bg-white">
-        {/* Left Accent Side */}
-        <div className="hidden md:flex flex-col items-center justify-center w-1/2 bg-gradient-to-br from-blue-500 to-purple-500 p-8 text-white relative">
-          <svg width="120" height="120" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-6 animate-bounce">
-            <circle cx="60" cy="60" r="60" fill="#fff2" />
-            <path d="M40 80 Q60 60 80 80" stroke="#fff" strokeWidth="4" fill="none" />
-            <circle cx="60" cy="55" r="8" fill="#fff" />
-          </svg>
-          <h2 className="text-2xl font-bold mb-2">Welcome Back!</h2>
-          <p className="text-center opacity-80">Sign in to continue your journey planning.</p>
+    <div className="min-h-[90vh] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full -z-10 bg-slate-50 dark:bg-slate-900" />
+      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse" />
+      <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-fuchsia-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-card w-full max-w-lg p-10 md:p-16 border-white/50 backdrop-blur-3xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)]"
+      >
+        <div className="text-center mb-12">
+          <Link to="/" className="inline-block group mb-8">
+            <div className="w-16 h-16 bg-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-indigo-500/30 group-hover:rotate-12 transition-transform">
+              <span className="text-white text-3xl font-black italic">T</span>
+            </div>
+          </Link>
+          <h2 className="text-4xl font-black tracking-tighter mb-4 italic">Welcome <span className="navbar-logo-gradient animate-gradient-text">Adventurer</span></h2>
+          <p className="text-slate-500 font-medium">Continue your path to the unexplored.</p>
         </div>
-        {/* Right Form Side */}
-        <div className="flex-1 p-8 flex flex-col justify-center">
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
-          {errorMsg && <p className="text-red-500 mb-3 text-center animate-pulse">{errorMsg}</p>}
-          <input
-            type="email"
-            placeholder="Email"
-            className="p-3 border border-gray-300 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="p-3 border border-gray-300 w-full mb-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button
-            onClick={handleLogin}
-            className="bg-blue-600 text-white py-3 w-full rounded-lg font-semibold shadow hover:bg-blue-700 transition-all duration-200"
+
+        {errorMsg && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-8 p-5 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-black flex items-center gap-4"
           >
-            Login
+            <span className="text-xl">⚠️</span> {errorMsg}
+          </motion.div>
+        )}
+
+        <form onSubmit={handleLogin} className="space-y-8">
+          <div className="space-y-3">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Archive ID (Email)</label>
+            <input
+              type="email"
+              placeholder="you@masterpiece.com"
+              className="premium-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex justify-between items-center ml-1">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Security Key</label>
+              <a href="#" className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-700 transition-colors">Recover?</a>
+            </div>
+            <input
+              type="password"
+              placeholder="••••••••"
+              className="premium-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-premium btn-premium-primary w-full text-xl py-5"
+          >
+            {loading ? (
+              <div className="flex items-center gap-3">
+                <span className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Syncing...</span>
+              </div>
+            ) : (
+              'Enter Archive 🚀'
+            )}
           </button>
-          <p className="mt-6 text-center text-gray-500 text-sm">
-            Don't have an account?{' '}
-            <a href="/signup" className="text-blue-600 hover:underline font-medium">Sign Up</a>
-          </p>
-        </div>
-      </div>
+        </form>
+
+        <p className="mt-12 text-center text-slate-500 font-bold text-sm tracking-tight">
+          First deployment?{' '}
+          <Link to="/signup" className="text-indigo-600 hover:underline">Register Dossier</Link>
+        </p>
+      </motion.div>
     </div>
   );
 };
