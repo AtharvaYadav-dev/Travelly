@@ -2,163 +2,208 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-// Example floating SVG shape
-const FloatingCloud = ({ className, style }) => (
-  <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
-    <ellipse cx="60" cy="30" rx="60" ry="30" fill="url(#paint0_radial)" fillOpacity="0.5" />
-    <defs>
-      <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientTransform="translate(60 30) scale(60 30)" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#a5b4fc" />
-        <stop offset="1" stopColor="#f472b6" />
-      </radialGradient>
-    </defs>
-  </svg>
-);
-
-const heroVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: "easeOut" } },
-};
-
 const Hero = () => {
   const navigate = useNavigate();
+
   return (
-    <>
-    <section className="relative flex flex-col items-center justify-center text-center py-20 sm:py-32 overflow-hidden">
-      {/* Floating shapes */}
-      <motion.div
-        className="absolute left-8 top-8 z-0"
-        animate={{ y: [0, 20, 0] }}
-        transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-      >
-        <FloatingCloud className="w-32 opacity-60" />
-      </motion.div>
-      <motion.div
-        className="absolute right-8 bottom-12 z-0"
-        animate={{ y: [0, -18, 0] }}
-        transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
-      >
-        <FloatingCloud className="w-24 opacity-40" style={{ transform: "scaleX(-1)" }} />
-      </motion.div>
-      {/* Hero Text */}
-      <motion.h1
-        className="relative z-10 text-4xl sm:text-6xl font-extrabold navbar-logo-gradient drop-shadow mb-4"
-        variants={heroVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        Plan Outings That Win Hearts
-      </motion.h1>
-      <motion.p
-        className="relative z-10 text-lg sm:text-2xl text-indigo-900/80 dark:text-slate-200 max-w-2xl mx-auto mb-8"
-        variants={heroVariants}
-        initial="hidden"
-        animate="visible"
-        transition={{ delay: 0.2 }}
-      >
-        Instantly create beautiful, smart, and share-worthy itineraries with AI magic, glassmorphism, and motion.
-      </motion.p>
-      {/* Call to Action */}
-      <motion.button
-        type="button"
-        onClick={() => navigate('/planner')}
-        className="relative z-10 inline-block px-8 py-3 rounded-xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-pink-400 text-white font-bold text-lg shadow-lg hover:scale-105 active:scale-95 transition-all"
-        whileHover={{ scale: 1.07 }}
-        whileTap={{ scale: 0.97 }}
-      >
-        Start Planning
-      </motion.button>
-      {/* Optional: add tsParticles, Lottie, or video background here later */}
-    </section>
+    <div className="w-full">
+      {/* --- HERO SECTION --- */}
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-center pt-12 pb-24 px-4 overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-1/4 -left-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-pink-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
 
-    {/* Features Section */}
-    <section className="relative bg-white/60 backdrop-blur-md py-16 px-4 sm:px-12 flex flex-col items-center">
-      <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 navbar-logo-gradient">Features</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
-        {[{
-          icon: (
-            <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ repeat: Infinity, duration: 4 }} className="bg-indigo-100 p-4 rounded-full">
-              <svg width="32" height="32" fill="none"><circle cx="16" cy="16" r="16" fill="#6366f1" opacity="0.2"/><path d="M10 16h12M16 10v12" stroke="#6366f1" strokeWidth="2" strokeLinecap="round"/></svg>
-            </motion.div>
-          ),
-          title: "AI-Powered Planning",
-          desc: "Generate smart, optimized itineraries instantly with advanced AI."
-        }, {
-          icon: (
-            <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 3 }} className="bg-pink-100 p-4 rounded-full">
-              <svg width="32" height="32" fill="none"><circle cx="16" cy="16" r="16" fill="#f472b6" opacity="0.2"/><path d="M16 10l6 12H10l6-12z" stroke="#f472b6" strokeWidth="2" strokeLinejoin="round"/></svg>
-            </motion.div>
-          ),
-          title: "Beautiful UI",
-          desc: "Enjoy a stunning, glassmorphic interface with smooth animations."
-        }, {
-          icon: (
-            <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="bg-green-100 p-4 rounded-full">
-              <svg width="32" height="32" fill="none"><circle cx="16" cy="16" r="16" fill="#34d399" opacity="0.2"/><path d="M10 18l6-6 6 6" stroke="#34d399" strokeWidth="2" strokeLinecap="round"/></svg>
-            </motion.div>
-          ),
-          title: "Share & Collaborate",
-          desc: "Invite friends and share plans easily with a single click."
-        }].map(({icon, title, desc}, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-white/70 backdrop-blur rounded-2xl shadow-lg p-8 flex flex-col items-center text-center">
-            {icon}
-            <h3 className="text-xl font-semibold mt-4 mb-2 text-gray-800">{title}</h3>
-            <p className="text-gray-500">{desc}</p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative z-10 text-center max-w-5xl"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-sm font-semibold mb-8 backdrop-blur-sm"
+          >
+            <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-ping" />
+            AI-Powered Travel Planning
           </motion.div>
-        ))}
-      </div>
-    </section>
 
-    {/* How It Works Section */}
-    <section className="relative bg-gradient-to-br from-indigo-50 to-pink-50 py-20 px-4 sm:px-12 flex flex-col items-center">
-      <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 navbar-logo-gradient">How It Works</h2>
-      <div className="flex flex-col md:flex-row gap-8 w-full max-w-5xl justify-center items-stretch">
-        {[{
-          step: 1, title: "Describe Your Outing", desc: "Tell us your destination, group size, and interests.", color: "from-indigo-400 to-blue-400"
-        }, {
-          step: 2, title: "Get Your Itinerary", desc: "AI generates a beautiful, optimized plan for you.", color: "from-fuchsia-400 to-pink-400"
-        }, {
-          step: 3, title: "Share & Enjoy!", desc: "Invite friends, export as PDF, or start your adventure.", color: "from-green-400 to-emerald-400"
-        }].map(({step, title, desc, color}, i) => (
-          <motion.div key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }} className={`flex-1 min-w-[220px] bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg p-8 mx-2 mb-6 md:mb-0 glass-card border-l-8 bg-gradient-to-br ${color}`} style={{ borderImage: `linear-gradient(to bottom right, var(--tw-gradient-stops)) 1` }}>
-            <div className="text-4xl font-bold mb-2 text-indigo-600 dark:text-indigo-400">{step}</div>
-            <h3 className="text-lg font-semibold mb-2 text-gray-800">{title}</h3>
-            <p className="text-gray-500">{desc}</p>
+          <motion.h1
+            className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-tight mb-8"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            Craft Your Next <br />
+            <span className="navbar-logo-gradient animate-gradient-text">Masterpiece Trip</span>
+          </motion.h1>
+
+          <motion.p
+            className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed mb-12 font-medium"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            Leave the logistics to us. Out world-class AI engine generates hyper-personalized,
+            realistic itineraries that transform your weekends into unforgettable stories.
+          </motion.p>
+
+          <motion.div
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            <button
+              onClick={() => navigate('/planner')}
+              className="px-8 py-4 rounded-2xl bg-indigo-600 text-white font-bold text-xl shadow-2xl shadow-indigo-500/20 hover:bg-indigo-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-3 group"
+            >
+              Start Planning Now
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+            <button
+              onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+              className="px-8 py-4 rounded-2xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xl hover:bg-white/80 transition-all"
+            >
+              See How It Works
+            </button>
           </motion.div>
-        ))}
-      </div>
-    </section>
+        </motion.div>
+      </section>
 
-    {/* Testimonials Section */}
-    <section className="relative bg-white/70 backdrop-blur-lg py-16 px-4 sm:px-12 flex flex-col items-center">
-      <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 navbar-logo-gradient">What Users Say</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
-        {[{
-          name: "Aarav P.", quote: "This app made planning our Goa trip effortless and fun! The AI suggestions were spot on.", img: "https://randomuser.me/api/portraits/men/4.jpg"
-        }, {
-          name: "Priya S.", quote: "Loved the beautiful itinerary and easy sharing. My friends were impressed!", img: "https://randomuser.me/api/portraits/women/8.jpg"
-        }, {
-          name: "Devansh R.", quote: "The UI is gorgeous and the features are super smart. Highly recommended!", img: "https://randomuser.me/api/portraits/men/65.jpg"
-        }].map(({name, quote, img}, i) => (
-          <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-white/80 rounded-2xl shadow-xl p-8 flex flex-col items-center text-center">
-            <img src={img} alt={name} className="w-16 h-16 rounded-full mb-4 shadow-lg border-2 border-fuchsia-300" />
-            <p className="text-gray-700 italic mb-3">“{quote}”</p>
-            <div className="text-fuchsia-600 font-bold">{name}</div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
+      {/* --- FEATURES GRID --- */}
+      <section className="py-24 px-4 sm:px-12 relative">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">The Future of Travel</h2>
+            <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
+              We combined cutting-edge artificial intelligence with premium design to give you
+              the ultimate outing experience.
+            </p>
+          </div>
 
-    {/* Footer Section
-    <footer className="relative bg-gradient-to-tr from-indigo-600 via-fuchsia-500 to-pink-400 text-white py-8 flex flex-col items-center">
-      <div className="mb-2 font-bold text-lg">Travelly &copy; 2025</div>
-      <div className="flex gap-4">
-        <a href="#" className="hover:text-indigo-100 transition">Instagram</a>
-        <a href="#" className="hover:text-indigo-100 transition">Twitter</a>
-        <a href="#" className="hover:text-indigo-100 transition">Contact</a>
-      </div>
-    </footer> */}
-    </>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Gen-AI Engine",
+                desc: "Powered by Gemini 2.5 Flash for hyper-realistic and fact-checked travel suggestions.",
+                icon: "⚡",
+                color: "bg-blue-500"
+              },
+              {
+                title: "Premium Prints",
+                desc: "Export your masterpiece plans into beautifully formatted PDF guides in one click.",
+                icon: "📄",
+                color: "bg-pink-500"
+              },
+              {
+                title: "Total Control",
+                desc: "Adjust group sizes, budget ranges, and time windows for a plan that truly fits you.",
+                icon: "🎛️",
+                color: "bg-amber-500"
+              }
+            ].map((feat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="glass-card p-10 group"
+              >
+                <div className={`w-14 h-14 rounded-2xl ${feat.color} bg-opacity-10 text-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  {feat.icon}
+                </div>
+                <h3 className="text-2xl font-bold mb-3">{feat.title}</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">
+                  {feat.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- STEPS SECTION --- */}
+      <section className="py-24 bg-indigo-600/5 dark:bg-indigo-500/5 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">
+                From Idea to Itinerary <br />
+                <span className="text-indigo-600">In Seconds</span>
+              </h2>
+              <div className="space-y-12">
+                {[
+                  { step: "01", title: "Share Your Vision", text: "Tell us where you want to go and what you love." },
+                  { step: "02", title: "AI Magic Happens", text: "Our engine crafts a localized, balanced, and smart plan." },
+                  { step: "03", title: "Live the Story", text: "Save it, share it, or hit the road immediately." }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-6">
+                    <span className="text-3xl font-black text-indigo-200 dark:text-indigo-900/40 tabular-nums">
+                      {item.step}
+                    </span>
+                    <div>
+                      <h4 className="text-2xl font-bold mb-2">{item.title}</h4>
+                      <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">{item.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative">
+              <motion.div
+                initial={{ rotate: -5, opacity: 0, x: 50 }}
+                whileInView={{ rotate: 0, opacity: 1, x: 0 }}
+                className="glass-card p-4 md:p-8 bg-white dark:bg-slate-800 shadow-3xl"
+              >
+                <div className="space-y-4">
+                  <div className="h-4 w-1/2 bg-slate-100 dark:bg-slate-700 rounded animate-shimmer" />
+                  <div className="h-12 w-full bg-slate-50 dark:bg-slate-700/50 rounded-xl" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl" />
+                    <div className="h-20 bg-pink-50 dark:bg-pink-500/10 rounded-xl" />
+                  </div>
+                  <div className="h-40 bg-slate-50 dark:bg-slate-700/50 rounded-xl" />
+                </div>
+              </motion.div>
+              {/* Decorative blobs */}
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-pink-400/20 rounded-full blur-[60px] -z-10" />
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-400/20 rounded-full blur-[60px] -z-10" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- CALL TO ACTION --- */}
+      <section className="py-32 px-4">
+        <motion.div
+          whileHover={{ y: -5 }}
+          className="max-w-4xl mx-auto rounded-[3rem] bg-gradient-to-tr from-indigo-600 to-fuchsia-600 p-12 md:p-20 text-center text-white shadow-2xl shadow-indigo-500/40 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 p-10 opacity-10 rotate-12">
+            <svg width="200" height="200" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
+            </svg>
+          </div>
+
+          <h2 className="text-4xl md:text-6xl font-black mb-8">Ready for Adventure?</h2>
+          <p className="text-indigo-100 text-xl md:text-2xl mb-12 max-w-2xl mx-auto opacity-90">
+            Join thousands of travelers who have already upgraded their weekend game.
+          </p>
+          <button
+            onClick={() => navigate('/planner')}
+            className="px-10 py-5 rounded-2xl bg-white text-indigo-600 font-black text-2xl hover:bg-opacity-90 hover:scale-[1.05] transition-all shadow-xl"
+          >
+            Create My Plan
+          </button>
+        </motion.div>
+      </section>
+    </div>
   );
 }
 

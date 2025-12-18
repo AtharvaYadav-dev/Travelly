@@ -54,35 +54,31 @@ const Result = () => {
     if (!text) return { days: [], costSummary: [] };
     console.log('📝 Formatting AI response, length:', text.length);
 
-    // Remove HTML tags if present
     const cleanText = text.replace(/<[^>]*>/g, '');
-
     const [mainText, costText] = cleanText.split(/Cost Summary:/i);
 
-    // Try multiple patterns to detect days
     const dayPatterns = [
-      /Day\s*\d+/gi,           // "Day 1", "Day 2"
-      /\*\*Day\s*\d+\*\*/gi,   // "**Day 1**"
-      /##\s*Day\s*\d+/gi,      // "## Day 1"
-      /Day\s+\d+:/gi,          // "Day 1:"
+      /Day\s*\d+/gi,
+      /\*\*Day\s*\d+\*\*/gi,
+      /##\s*Day\s*\d+/gi,
+      /Day\s+\d+:/gi,
     ];
 
     let days = [];
 
-    // Try each pattern
     for (const pattern of dayPatterns) {
       const splits = mainText.split(pattern).filter(Boolean);
-      if (splits.length >= 1) { // Changed from > 1 to >= 1 to catch single day plans
+      if (splits.length >= 1) {
         days = splits.map((day, index) => {
           const blocks = day
             .split('\n')
             .map((line) =>
               line
-                .replace(/^[\*\#\-•🌟]+/, '')  // Remove markdown and bullets
-                .replace(/\*\*/g, '')           // Remove bold markers
+                .replace(/^[\*\#\-•🌟]+/, '')
+                .replace(/\*\*/g, '')
                 .trim()
             )
-            .filter((line) => line.length > 2); // Removed the 500 char limit
+            .filter((line) => line.length > 2);
 
           return {
             title: `Day ${index + 1}`,
@@ -90,16 +86,13 @@ const Result = () => {
           };
         });
 
-        if (days.length > 0 && days.some(d => d.items.length > 0)) { // Changed every(items.length > 0) to some(...)
-          console.log('✅ Found', days.length, 'days using pattern:', pattern);
+        if (days.length > 0 && days.some(d => d.items.length > 0)) {
           break;
         }
       }
     }
 
-    // Fallback: if no days found or all empty, treat entire text as items
     if (days.length === 0 || days.every(d => d.items.length === 0)) {
-      console.log('⚠️ No day pattern found or items empty, using fallback');
       const allLines = (mainText || text)
         .split('\n')
         .map(line => line.trim()
@@ -107,11 +100,11 @@ const Result = () => {
           .replace(/\*\*/g, '')
           .trim()
         )
-        .filter(line => line.length > 2); // Removed the 500 char limit
+        .filter(line => line.length > 2);
 
       days = [{
         title: 'Your Itinerary',
-        items: allLines.length > 0 ? allLines : [text.substring(0, 1000)] // Last resort: show first 1000 chars
+        items: allLines.length > 0 ? allLines : [text.substring(0, 1000)]
       }];
     }
 
@@ -119,10 +112,9 @@ const Result = () => {
       ? costText
         .split('\n')
         .map((line) => line.replace(/^[-•🌟\*\#]+/, '').replace(/\*\*/g, '').trim())
-        .filter((line) => line.length > 2) // Lowered from 3
+        .filter((line) => line.length > 2)
       : [];
 
-    console.log('📊 Parsed:', days.length, 'days,', costLines.length, 'cost items');
     return { days, costSummary: costLines };
   };
 
@@ -137,110 +129,46 @@ const Result = () => {
     for (let i = 1; i <= totalDays; i++) {
       dayFormatText += `
 Day ${i}
-Morning: Activity, Location, Time, ₹Cost (category)
-Afternoon: ...
-Evening: ...
+- [HH:MM AM/PM] Activity name: Description. (Estimated Cost: ₹X)
 `;
     }
 
     const prompt = `
-You are an expert, detail-oriented travel planning assistant.
-
-Your top priority is to generate a PERFECT, factual, and realistic ${totalDays}-day itinerary. It is OK if it takes extra time—do NOT rush. DO NOT hallucinate or invent information. Only use verifiable, realistic, and logical details that could actually occur in the real world. If you are unsure, leave that part blank or say "Not enough information."
-
-STRICT CONSTRAINTS:
-- Do NOT make up places, activities, or costs that do not exist or are not plausible in the specified location and range.
-- Only use information that is highly likely to be true for the given location, date, and context.
-- If you cannot find or estimate something reliably, say "Not enough information" for that slot.
-- Never invent facts, names, or addresses. Avoid generic or vague suggestions.
-- If the plan cannot be perfect, err on the side of caution and accuracy.
-
-Based on the following trip details, generate a DEEP, highly detailed, premium ${totalDays}-day itinerary.
-
-Trip Details:
-- Trip Title: ${data.title}
-- Trip Type: ${data.type}
-- Number of Participants: ${data.participants}
-- Total Budget: ₹${data.budget}
-- Location: ${data.location}
-- Distance Range: ${data.range}
-- Start Date: ${data.startDate}
-- End Date: ${data.endDate}
-- Time Window: ${data.startTime} to ${data.endTime}
+You are a luxury travel concierge. Create a detailed, professional ${totalDays}-day itinerary for ${data.participants} people in ${data.location}.
+Title: ${data.title}
+Budget: ₹${data.budget}
+Interests: ${data.type}
+Range: ${data.range}
 
 Instructions:
-1. For each day, break down the schedule into Morning, Afternoon, and Evening with specific times (e.g., 8:00 AM - 10:00 AM).
-2. For each activity, provide:
-   - Activity Name
-   - Exact Location (with local landmark or address if possible)
-   - Start & End Time
-   - Estimated Cost (₹, with category)
-   - Short Description (why it's special, what to expect)
-   - Local insights/tips (e.g., best photo spot, must-try food, cultural etiquette)
-   - Food/Dining suggestions (local cuisine, best-rated spots, veg/non-veg options)
-   - Weather or packing tips if relevant
-   - Safety/comfort notes (if needed)
-   - 1 alternative (backup) activity for each slot
-3. Make the plan realistic, actionable, and personalized for the group size and budget.
-4. Ensure all activities are scheduled within ${data.range} of ${data.location} and between ${data.startTime} and ${data.endTime}.
-5. DO NOT use Markdown, emojis, bullet points, or asterisks (**). Use clear, plain text with good spacing for readability.
+1. For each day, provide 4-5 distinct activities with specific times.
+2. Use the format: "- [Time] Activity: Detail. (Cost: ₹X)"
+3. Ensure costs are realistic and stay within the total ₹${data.budget} budget.
+4. Include local dining gems and hidden spots.
+5. End with a "Cost Summary:" section.
 
 FORMAT:
 ${dayFormatText}
-
-After the itinerary, add a detailed Cost Summary (with breakdowns for transport, food, tickets, shopping, etc.) and a "Local Tips & Warnings" section with any extra advice for this trip.
 `;
 
-    // Direct Gemini API call (skip serverless function)
     try {
       setLoading(true);
-      setNotification({ type: '', message: '' });
-
       const key = import.meta.env.VITE_GEMINI_API_KEY;
-      console.log('🔑 API Key present:', !!key);
+      if (!key) throw new Error('API Key missing');
 
-      if (!key) {
-        throw new Error('Missing VITE_GEMINI_API_KEY environment variable');
-      }
-
-      console.log('🚀 Calling Gemini API...');
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{
-              parts: [{ text: prompt }]
-            }]
+            contents: [{ parts: [{ text: prompt }] }]
           }),
         }
       );
 
-      console.log('📡 Response status:', response.status);
-
-      const raw = await response.text();
-      console.log('📦 Raw response length:', raw.length);
-
-      let result = null;
-      try {
-        result = raw ? JSON.parse(raw) : null;
-      } catch (e) {
-        console.error('❌ JSON parse error:', e);
-        result = { raw };
-      }
-
-      if (!response.ok) {
-        const errorMsg = result?.error?.message || `Gemini API error (${response.status})`;
-        console.error('❌ API Error:', errorMsg);
-        throw new Error(errorMsg);
-      }
-
-      const text =
-        result?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        '❌ Failed to generate.';
-
-      console.log('✅ Generated text length:', text.length);
+      const result = await response.json();
+      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Failed to generate.';
       setAiResponse(text);
 
       const { days, costSummary } = formatAIResponse(text);
@@ -248,224 +176,169 @@ After the itinerary, add a detailed Cost Summary (with breakdowns for transport,
       setCostSummary(costSummary);
 
       if (data.id) {
-        const { error } = await supabase
-          .from('itineraries')
-          .update({ ai_plan: text })
-          .eq('id', data.id);
-
-        if (error) {
-          console.error('❌ Error saving AI plan to Supabase:', error);
-          setNotification({ type: 'error', message: 'Error saving AI plan to Supabase.' });
-        } else {
-          setNotification({ type: 'success', message: 'AI plan saved to Supabase!' });
-          console.log('✅ AI plan saved to Supabase');
-        }
+        await supabase.from('itineraries').update({ ai_plan: text }).eq('id', data.id);
       }
     } catch (err) {
-      console.error('❌ Gemini API Error:', err);
       setAiResponse('❌ Error generating itinerary.');
-      setNotification({
-        type: 'error',
-        message: `Error: ${err?.message || 'Failed to generate itinerary'}`
-      });
+      setNotification({ type: 'error', message: err.message });
     } finally {
       setLoading(false);
     }
   };
 
-  // Download as PDF (jsPDF implementation)
   const handleDownloadPDF = () => {
     import('jspdf').then(jsPDFModule => {
       const doc = new jsPDFModule.jsPDF();
       doc.setFont('helvetica');
-      doc.setFontSize(18);
-      doc.text('AI-Powered Trip Plan', 105, 18, { align: 'center' });
-      let y = 30;
-      formattedResponse.forEach((day, i) => {
-        doc.setFontSize(15);
-        doc.setTextColor(54, 79, 199);
-        doc.text(`${day.title}`, 14, y);
-        y += 8;
-        doc.setFontSize(12);
-        doc.setTextColor(40, 40, 40);
+      doc.setFontSize(22);
+      doc.text(savedData?.title || 'Trip Plan', 105, 25, { align: 'center' });
+      let y = 40;
+      formattedResponse.forEach((day) => {
+        doc.setFontSize(16);
+        doc.setTextColor(99, 102, 241);
+        doc.text(day.title, 14, y);
+        y += 10;
+        doc.setFontSize(11);
+        doc.setTextColor(60, 60, 60);
         day.items.forEach(item => {
-          if (y > 275) { doc.addPage(); y = 20; }
-          doc.text(`- ${item}`, 18, y);
-          y += 7;
+          if (y > 270) { doc.addPage(); y = 20; }
+          const lines = doc.splitTextToSize(`• ${item}`, 180);
+          doc.text(lines, 18, y);
+          y += lines.length * 6 + 2;
         });
-        y += 4;
+        y += 5;
       });
-      if (costSummary.length > 0) {
-        doc.setFontSize(15);
-        doc.setTextColor(32, 180, 90);
-        doc.text('Cost Summary', 14, y);
-        y += 8;
-        doc.setFontSize(12);
-        doc.setTextColor(40, 40, 40);
-        costSummary.forEach(item => {
-          if (y > 275) { doc.addPage(); y = 20; }
-          doc.text(`- ${item}`, 18, y);
-          y += 7;
-        });
-      }
-      doc.save('AI-Trip-Plan.pdf');
+      doc.save(`${savedData?.title || 'Trip'}-Plan.pdf`);
     });
   };
 
-  // Save plan to Supabase on success
-  const savePlanToSupabase = async (planText) => {
-    if (!savedData || !savedData.id) return;
-    try {
-      const { error } = await supabase
-        .from('itineraries')
-        .update({ ai_plan: planText })
-        .eq('id', savedData.id);
-      if (error) {
-        setNotification({ type: 'error', message: 'Error saving AI plan to Supabase.' });
-      } else {
-        setNotification({ type: 'success', message: 'AI plan saved to Supabase!' });
-      }
-    } catch (err) {
-      setNotification({ type: 'error', message: 'Error saving AI plan to Supabase.' });
-    }
-  };
-
-
   return (
-    <>
-      <div className="max-w-3xl mx-auto p-2 sm:p-8" id="itinerary-export">
-        <Notification
-          type={notification.type}
-          message={notification.message}
-          onClose={() => setNotification({ type: '', message: '' })}
-        />
-        <motion.h2
-          className="text-4xl font-extrabold text-center mb-10 drop-shadow-lg"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
+    <div className="max-w-5xl mx-auto px-4 py-12">
+      <Notification
+        type={notification.type}
+        message={notification.message}
+        onClose={() => setNotification({ type: '', message: '' })}
+      />
+
+      {/* --- HEADER --- */}
+      <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="inline-block px-4 py-1 rounded-full bg-indigo-500/10 text-indigo-600 text-sm font-bold mb-4"
         >
-          <span className="bg-gradient-to-tr from-indigo-600 via-fuchsia-500 to-pink-400 bg-clip-text text-transparent inline-block animate-gradient-move">
-            <span className="inline-block animate-bounce mr-2">🤖</span> Your AI-Powered Trip Plan
-          </span>
+          ✨ AI Generated Expert Plan
+        </motion.div>
+        <motion.h2
+          className="text-4xl md:text-6xl font-black tracking-tight mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          Your <span className="navbar-logo-gradient animate-gradient-text">Premium Itinerary</span>
         </motion.h2>
 
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
-          <button
-            onClick={() => navigate('/planner')}
-            className="px-5 py-2 rounded-xl bg-gradient-to-tr from-gray-200 via-white to-pink-100 text-gray-700 font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all border border-gray-200"
-          >
-            <span className="mr-2">🔙</span> Back to Planner
+        <div className="flex flex-wrap justify-center gap-3">
+          <button onClick={() => navigate('/planner')} className="px-5 py-2.5 rounded-xl glass-ui font-bold hover:scale-105 transition-all flex items-center gap-2">
+            <span>🔙</span> Modify
           </button>
-          <button
-            onClick={() => savedData && generateAI(savedData)}
-            disabled={loading}
-            className="px-5 py-2 rounded-xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-pink-400 text-white font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 border border-indigo-200"
-          >
-            {loading && (
-              <span className="w-5 h-5 border-2 border-white border-t-indigo-400 rounded-full animate-spin inline-block"></span>
-            )}
-            <span className="mr-2">🔄</span> Regenerate Plan
+          <button onClick={handleDownloadPDF} className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:scale-105 transition-all flex items-center gap-2">
+            <span>⬇️</span> Download PDF
           </button>
-          <button
-            onClick={handleDownloadPDF}
-            className="px-5 py-2 rounded-xl bg-gradient-to-tr from-green-400 via-blue-400 to-indigo-400 text-white font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all flex items-center gap-2 border border-green-200"
-          >
-            <span className="mr-2">⬇️</span> Download as PDF
+          <button onClick={handleCopyPlan} className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 shadow-sm font-bold hover:scale-105 transition-all flex items-center gap-2">
+            <span>📋</span> Copy
           </button>
-          <button
-            onClick={handleCopyPlan}
-            className="px-5 py-2 rounded-xl bg-gradient-to-tr from-amber-300 via-yellow-300 to-orange-300 text-gray-900 font-semibold shadow hover:scale-[1.04] active:scale-95 transition-all flex items-center gap-2 border border-amber-200"
-          >
-            <span className="mr-1">📋</span> Copy Plan
+          <button onClick={() => savedData && generateAI(savedData)} disabled={loading} className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:scale-105 transition-all flex items-center gap-2 disabled:opacity-50">
+            {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span>🔄</span>}
+            Regenerate
           </button>
         </div>
-
-        {loading ? (
-          <div className="flex flex-col items-center justify-center min-h-[320px] gap-4">
-            {/* Lottie travel loader animation */}
-            <div className="w-40 h-40 md:w-56 md:h-56 flex items-center justify-center">
-              <Lottie animationData={travelLoader} loop={true} style={{ width: '100%', height: '100%' }} />
-            </div>
-            {/* Skeleton shimmer loader */}
-            <div className="w-full space-y-6">
-              {[1, 2].map((_, idx) => (
-                <div key={idx} className="animate-pulse bg-white/60 dark:bg-dark-glass backdrop-blur rounded-2xl shadow-xl border border-indigo-100 dark:border-dark-border p-8 mb-4">
-                  <div className="h-6 w-32 bg-indigo-100 dark:bg-dark-card rounded mb-4"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 w-3/4 bg-indigo-50 dark:bg-dark-card rounded"></div>
-                    <div className="h-4 w-2/3 bg-indigo-50 dark:bg-dark-card rounded"></div>
-                    <div className="h-4 w-1/2 bg-indigo-50 dark:bg-dark-card rounded"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="text-center text-gray-400 dark:text-gray-300 font-medium">Generating your personalized plan...</p>
-          </div>
-        ) : formattedResponse.length > 0 ? (
-          <>
-            <div className="space-y-8">
-              {formattedResponse.map((day, i) => (
-                <motion.div
-                  key={i}
-                  className="glass-card p-4 sm:p-8 rounded-2xl shadow-xl border border-indigo-100 dark:border-dark-border backdrop-blur-md bg-white/70 dark:bg-dark-glass dark:shadow-glass-dark hover:scale-[1.02] transition-transform duration-200"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                >
-                  <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-300 mb-3 flex items-center gap-2">
-                    <span className="inline-block text-2xl">🗓️</span> {day.title}
-                  </h3>
-                  <ul className="space-y-2 text-gray-700 dark:text-gray-100">
-                    {day.items.map((item, j) => {
-                      // Icon logic for activity times
-                      let icon = '📍';
-                      if (/morning/i.test(item)) icon = '☀️';
-                      else if (/afternoon/i.test(item)) icon = '🌞';
-                      else if (/evening/i.test(item)) icon = '🌙';
-                      else if (/breakfast|brunch/i.test(item)) icon = '🍳';
-                      else if (/lunch/i.test(item)) icon = '🍽️';
-                      else if (/dinner/i.test(item)) icon = '🍽️';
-                      else if (/party|night|event/i.test(item)) icon = '🎉';
-                      return (
-                        <li key={j} className="flex items-center gap-2">
-                          <span className="inline-block text-lg">{icon}</span> {item}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </motion.div>
-              ))}
-            </div>
-            {costSummary.length > 0 && (
-              <motion.div
-                className="glass-card p-4 sm:p-8 rounded-2xl shadow-xl border border-green-100 dark:border-dark-border backdrop-blur-md bg-green-50/60 dark:bg-dark-glass dark:shadow-glass-dark mt-10"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: (formattedResponse.length + 1) * 0.13 }}
-              >
-                <h3 className="text-xl font-bold text-green-700 dark:text-green-300 mb-4 flex items-center gap-2">
-                  <span className="inline-block text-2xl">💸</span> Cost Summary
-                </h3>
-                <ul className="space-y-2 text-gray-800 dark:text-gray-100">
-                  {costSummary.map((item, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <span className="inline-block text-lg">💰</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            )}
-          </>
-        ) : (
-          <p className="text-red-500 text-center font-semibold">{aiResponse}</p>
-        )}
       </div>
-      <FAB show={showFab} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} label="Scroll to Top" />
-    </>
+
+      {/* --- CONTENT --- */}
+      {loading ? (
+        <div className="flex flex-col items-center py-20">
+          <div className="w-24 h-24 border-8 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-8" />
+          <p className="text-2xl font-bold text-slate-400 animate-pulse">Designing your adventure...</p>
+        </div>
+      ) : formattedResponse.length > 0 ? (
+        <div className="space-y-12">
+          {formattedResponse.map((day, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="relative pl-8 md:pl-12 border-l-4 border-indigo-500/20 py-4"
+            >
+              {/* Day Marker */}
+              <div className="absolute -left-4 top-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-500/40">
+                {i + 1}
+              </div>
+
+              <div className="glass-card p-6 md:p-10 mb-6">
+                <h3 className="text-3xl font-black mb-8 flex items-center gap-4">
+                  <span className="text-slate-300">#</span> {day.title}
+                </h3>
+
+                <div className="space-y-8">
+                  {day.items.map((item, j) => {
+                    const timeMatch = item.match(/\[(.*?)\]/);
+                    const time = timeMatch ? timeMatch[1] : null;
+                    const content = item.replace(/\[.*?\]/, '').trim();
+                    const [activity, ...detail] = content.split(':');
+
+                    return (
+                      <div key={j} className="flex flex-col md:flex-row gap-4 md:gap-8 group">
+                        <div className="md:w-32 flex-shrink-0">
+                          <span className="text-lg font-black text-indigo-500 group-hover:scale-110 transition-transform inline-block">
+                            {time || '--:--'}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">{activity}</h4>
+                          <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed">{detail.join(':')}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+
+          {/* Cost Summary */}
+          {costSummary.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card p-8 md:p-12 border-t-8 border-emerald-500 bg-emerald-50/20"
+            >
+              <h3 className="text-3xl font-black mb-8 text-emerald-700 flex items-center gap-4">
+                <span className="text-4xl">💰</span> Cost Breakdown
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {costSummary.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-white/50 border border-emerald-100 shadow-sm">
+                    <span className="text-slate-600 font-medium">{item.split(':')[0]}</span>
+                    <span className="text-xl font-bold text-emerald-600">{item.split(':')[1] || item}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </div>
+      ) : (
+        <div className="text-center py-20">
+          <p className="text-2xl font-bold text-red-500">{aiResponse}</p>
+        </div>
+      )}
+
+      <FAB show={showFab} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} label="Scroll Top" />
+    </div>
   );
 };
+
+export default Result;
 
 // Floating Action Button: Show when scrolled down
 // (Add this before export default Result;)
