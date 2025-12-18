@@ -56,7 +56,7 @@ const Hero = () => {
             className="text-6xl sm:text-8xl md:text-9xl font-black text-white leading-[0.9] tracking-tighter mb-8"
           >
             Escape the <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-400 animate-gradient-text">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-400 animate-gradient-text animate-reveal">
               Ordinary
             </span>
           </motion.h1>
