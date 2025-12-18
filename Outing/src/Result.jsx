@@ -51,6 +51,7 @@ const Result = () => {
   }, []);
 
   const formatAIResponse = (text) => {
+    if (!text) return { days: [], costSummary: [] };
     console.log('📝 Formatting AI response, length:', text.length);
 
     // Remove HTML tags if present
@@ -71,7 +72,7 @@ const Result = () => {
     // Try each pattern
     for (const pattern of dayPatterns) {
       const splits = mainText.split(pattern).filter(Boolean);
-      if (splits.length > 1) {
+      if (splits.length >= 1) { // Changed from > 1 to >= 1 to catch single day plans
         days = splits.map((day, index) => {
           const blocks = day
             .split('\n')
@@ -81,7 +82,7 @@ const Result = () => {
                 .replace(/\*\*/g, '')           // Remove bold markers
                 .trim()
             )
-            .filter((line) => line.length > 5 && line.length < 500);
+            .filter((line) => line.length > 2); // Removed the 500 char limit
 
           return {
             title: `Day ${index + 1}`,
@@ -89,24 +90,28 @@ const Result = () => {
           };
         });
 
-        if (days.length > 0 && days[0].items.length > 0) {
+        if (days.length > 0 && days.some(d => d.items.length > 0)) { // Changed every(items.length > 0) to some(...)
           console.log('✅ Found', days.length, 'days using pattern:', pattern);
           break;
         }
       }
     }
 
-    // Fallback: if no days found, treat entire text as one day
+    // Fallback: if no days found or all empty, treat entire text as items
     if (days.length === 0 || days.every(d => d.items.length === 0)) {
-      console.log('⚠️ No day pattern found, using fallback');
-      const allLines = mainText
+      console.log('⚠️ No day pattern found or items empty, using fallback');
+      const allLines = (mainText || text)
         .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 10 && line.length < 500);
+        .map(line => line.trim()
+          .replace(/^[\*\#\-•🌟]+/, '')
+          .replace(/\*\*/g, '')
+          .trim()
+        )
+        .filter(line => line.length > 2); // Removed the 500 char limit
 
       days = [{
-        title: 'Itinerary',
-        items: allLines
+        title: 'Your Itinerary',
+        items: allLines.length > 0 ? allLines : [text.substring(0, 1000)] // Last resort: show first 1000 chars
       }];
     }
 
@@ -114,7 +119,7 @@ const Result = () => {
       ? costText
         .split('\n')
         .map((line) => line.replace(/^[-•🌟\*\#]+/, '').replace(/\*\*/g, '').trim())
-        .filter((line) => line.length > 3 && (line.includes('₹') || line.includes('Rs') || line.includes('INR')))
+        .filter((line) => line.length > 2) // Lowered from 3
       : [];
 
     console.log('📊 Parsed:', days.length, 'days,', costLines.length, 'cost items');
@@ -404,10 +409,9 @@ After the itinerary, add a detailed Cost Summary (with breakdowns for transport,
                 <motion.div
                   key={i}
                   className="glass-card p-4 sm:p-8 rounded-2xl shadow-xl border border-indigo-100 dark:border-dark-border backdrop-blur-md bg-white/70 dark:bg-dark-glass dark:shadow-glass-dark hover:scale-[1.02] transition-transform duration-200"
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={{ duration: 0.6, delay: i * 0.13 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
                   <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-300 mb-3 flex items-center gap-2">
                     <span className="inline-block text-2xl">🗓️</span> {day.title}
