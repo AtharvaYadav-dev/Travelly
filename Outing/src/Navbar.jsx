@@ -8,8 +8,8 @@ const NavLink = ({ to, children }) => {
     <Link
       to={to}
       className={`px-3 py-2 rounded-lg transition-colors duration-200 whitespace-nowrap ${active
-          ? 'bg-indigo-100/80 text-indigo-700 dark:bg-dark-glass dark:text-indigo-300 border border-indigo-200 dark:border-dark-border'
-          : 'hover:bg-indigo-100/60 dark:hover:bg-dark-glass text-gray-700 dark:text-gray-100'
+        ? 'bg-indigo-100/80 text-indigo-700 dark:bg-dark-glass dark:text-indigo-300 border border-indigo-200 dark:border-dark-border'
+        : 'hover:bg-indigo-100/60 dark:hover:bg-dark-glass text-gray-700 dark:text-gray-100'
         }`}
     >
       {children}
@@ -46,14 +46,25 @@ const Navbar = ({ user, onLogout }) => {
         <div className="flex items-center gap-2">
           {user ? (
             <div className="flex items-center gap-2">
-              <span className="ml-0 sm:ml-2 flex items-center gap-2 bg-indigo-50/80 dark:bg-dark-card px-3 py-1 rounded-full text-indigo-700 dark:text-indigo-300 font-semibold shadow-sm border border-indigo-200 dark:border-dark-border">
-                <span className="inline-block w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-400 to-pink-400 dark:from-indigo-700 dark:to-pink-700 flex items-center justify-center text-white font-bold text-xs">
-                  {(user.user_metadata?.full_name || user.email || '?').charAt(0).toUpperCase()}
+              <Link
+                to="/profile"
+                className="ml-0 sm:ml-2 flex items-center gap-2 bg-indigo-50/80 dark:bg-dark-card px-3 py-1 rounded-full text-indigo-700 dark:text-indigo-300 font-semibold shadow-sm border border-indigo-200 dark:border-dark-border hover:bg-indigo-100 dark:hover:bg-dark-glass transition-all group"
+              >
+                <span className="inline-block w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-400 to-pink-400 dark:from-indigo-700 dark:to-pink-700 flex items-center justify-center text-white font-bold text-xs overflow-hidden border border-white/50">
+                  {user.user_metadata?.avatar_url ? (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    (user.user_metadata?.full_name || user.email || '?').charAt(0).toUpperCase()
+                  )}
                 </span>
-                <span className="hidden sm:inline">
+                <span className="hidden sm:inline group-hover:text-indigo-900 dark:group-hover:text-white transition-colors">
                   {user.user_metadata?.full_name || user.email?.split('@')[0]}
                 </span>
-              </span>
+              </Link>
               <button
                 onClick={onLogout}
                 className="px-3 py-2 rounded-lg bg-red-50/80 dark:bg-dark-card text-red-500 dark:text-red-300 font-semibold hover:bg-red-100/90 dark:hover:bg-dark-glass transition-colors duration-200 shadow-sm border border-red-200 dark:border-dark-border"
