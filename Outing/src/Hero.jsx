@@ -24,7 +24,7 @@ const Hero = () => {
     <div className="w-full bg-slate-950 overflow-x-hidden selection:bg-primary/40">
 
       {/* 🏔️ FULLSCREEN CINEMATIC HERO */}
-      <section className="relative h-[110vh] flex flex-col items-center justify-center px-6 overflow-hidden">
+      <section className="relative h-[100vh] md:h-[110vh] flex flex-col items-center justify-center px-4 md:px-6 overflow-hidden">
         {/* Parallax Background */}
         <motion.div
           style={{ y: yParallax, opacity: opacityHero, scale: scaleHero }}
@@ -57,18 +57,18 @@ const Hero = () => {
 
         {/* Hero Content */}
         <div className="relative z-10 text-center max-w-7xl px-4 mt-[-5vh]">
-          <div className="mb-4 overflow-hidden">
+          <div className="mb-3 md:mb-4 overflow-hidden">
             <motion.span
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-[9px] font-black uppercase tracking-[0.8em] text-primary/80 block"
+              className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.4em] md:tracking-[0.8em] text-primary/80 block"
             >
               Your Swiss Travel Guide
             </motion.span>
           </div>
 
-          <h1 className="text-7xl md:text-[11rem] font-black text-white leading-none tracking-tighter uppercase italic mb-8 flex flex-wrap justify-center overflow-hidden">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-[11rem] font-black text-white leading-none tracking-tighter uppercase italic mb-6 md:mb-8 flex flex-wrap justify-center overflow-hidden">
             {title.split('').map((char, i) => (
               <motion.span
                 key={i}
@@ -82,12 +82,12 @@ const Hero = () => {
             ))}
           </h1>
 
-          <div className="overflow-hidden mb-12">
+          <div className="overflow-hidden mb-8 md:mb-12">
             <motion.p
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 1, delay: 1.2 }}
-              className="text-lg md:text-xl text-white/40 font-medium tracking-[0.4em] uppercase italic"
+              className="text-sm md:text-lg lg:text-xl text-white/40 font-medium tracking-[0.2em] md:tracking-[0.4em] uppercase italic"
             >
               {subtitle}
             </motion.p>
@@ -101,7 +101,7 @@ const Hero = () => {
             <Magnetic>
               <button
                 onClick={() => navigate('/planner')}
-                className="btn-expensive bg-primary/90 border-none px-14 py-4"
+                className="btn-expensive bg-primary/90 border-none px-8 md:px-14 py-3 md:py-4 text-[9px] md:text-[11px]"
               >
                 Start Journey
               </button>
@@ -113,34 +113,34 @@ const Hero = () => {
         <motion.div
           animate={{ y: [0, 8, 0], opacity: [0.2, 0.5, 0.2] }}
           transition={{ duration: 3, repeat: Infinity }}
-          className="absolute bottom-10 flex flex-col items-center gap-3"
+          className="absolute bottom-6 md:bottom-10 flex flex-col items-center gap-3"
         >
-          <div className="w-[1px] h-12 bg-gradient-to-b from-primary/60 to-transparent" />
+          <div className="w-[1px] h-8 md:h-12 bg-gradient-to-b from-primary/60 to-transparent" />
         </motion.div>
       </section>
 
       {/* 🔍 COMPACT SEARCH */}
-      <section className="relative z-20 -mt-24 px-6 max-w-6xl mx-auto">
+      <section className="relative z-20 -mt-16 md:-mt-24 px-4 md:px-6 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="premium-glass p-10 md:p-12 rounded-3xl"
+          className="premium-glass p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-3xl"
         >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8">
             {[
               { label: 'Destination', type: 'select', options: ['Zermatt', 'Interlaken', 'Lucerne', 'St. Moritz'] },
               { label: 'Group Size', type: 'select', options: ['1-2 People', '3-5 People', 'Large Group'] },
               { label: 'Travel Dates', type: 'date' }
             ].map((field, i) => (
-              <div key={i} className="space-y-3">
-                <label className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 ml-2">{field.label}</label>
+              <div key={i} className="space-y-2 md:space-y-3">
+                <label className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.2em] text-white/20 ml-2">{field.label}</label>
                 {field.type === 'select' ? (
-                  <select className="premium-input py-4 text-xs font-bold bg-slate-900/60">
+                  <select className="premium-input py-3 md:py-4 text-xs font-bold bg-slate-900/60">
                     {field.options.map(o => <option key={o}>{o}</option>)}
                   </select>
                 ) : (
-                  <input type="date" className="premium-input py-4 text-xs bg-slate-900/60" />
+                  <input type="date" className="premium-input py-3 md:py-4 text-xs bg-slate-900/60" />
                 )}
               </div>
             ))}
@@ -148,7 +148,7 @@ const Hero = () => {
               <Magnetic>
                 <button
                   onClick={() => navigate('/discover')}
-                  className="w-full bg-primary text-white py-4 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-primary/20 hover:scale-105 transition-all"
+                  className="w-full bg-primary text-white py-3 md:py-4 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] shadow-2xl shadow-primary/20 hover:scale-105 transition-all"
                 >
                   Search Trips
                 </button>
@@ -159,15 +159,15 @@ const Hero = () => {
       </section>
 
       {/* 🏞️ PLACES SECTION (CLEANER) */}
-      <section className="py-40 px-6 max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-20 items-center mb-24">
+      <section className="py-20 md:py-32 lg:py-40 px-4 md:px-6 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center mb-12 md:mb-20 lg:mb-24">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <span className="text-primary font-black uppercase tracking-[0.5em] text-[10px] mb-4 block underline decoration-primary/30 underline-offset-8">Featured</span>
-            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-tight italic text-white">
+            <span className="text-primary font-black uppercase tracking-[0.3em] md:tracking-[0.5em] text-[8px] md:text-[10px] mb-3 md:mb-4 block underline decoration-primary/30 underline-offset-8">Featured</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-tight italic text-white">
               Top <br /> <span className="text-white/20">Places</span>
             </h2>
           </motion.div>
@@ -175,17 +175,17 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-white/30 text-lg font-medium leading-relaxed italic border-l border-white/5 pl-10"
+            className="text-white/30 text-sm md:text-base lg:text-lg font-medium leading-relaxed italic border-l border-white/5 pl-6 md:pl-10"
           >
             Recommended by local guides and travel experts. We've selected the best places to visit in Switzerland.
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
           {[
-            { title: "Mürren", subtitle: "Automobile-Free Village", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800", h: "h-[500px]" },
-            { title: "Zermatt", subtitle: "The Matterhorn Base", img: "https://images.unsplash.com/photo-1531310197839-ccf54634509e?q=80&w=800", h: "h-[600px] mt-[-30px]" },
-            { title: "Luzern", subtitle: "Ancient Waterfront", img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=800", h: "h-[500px]" },
+            { title: "Mürren", subtitle: "Automobile-Free Village", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800", h: "h-[350px] md:h-[450px] lg:h-[500px]" },
+            { title: "Zermatt", subtitle: "The Matterhorn Base", img: "https://images.unsplash.com/photo-1531310197839-ccf54634509e?q=80&w=800", h: "h-[350px] md:h-[500px] lg:h-[600px] md:mt-[-30px]" },
+            { title: "Luzern", subtitle: "Ancient Waterfront", img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=800", h: "h-[350px] md:h-[450px] lg:h-[500px]" },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -193,16 +193,16 @@ const Hero = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: i * 0.1 }}
-              className={`group relative overflow-hidden rounded-[2rem] bg-slate-900 border border-white/5 ${item.h}`}
+              className={`group relative overflow-hidden rounded-xl md:rounded-2xl lg:rounded-[2rem] bg-slate-900 border border-white/5 ${item.h}`}
             >
               <img
                 src={item.img}
                 alt={item.title}
                 className="w-full h-full object-cover opacity-30 grayscale group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-[1.5s]"
               />
-              <div className="absolute inset-x-0 bottom-0 p-10 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent">
-                <span className="text-primary text-[8px] font-black uppercase tracking-widest mb-1 block">{item.subtitle}</span>
-                <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">{item.title}</h3>
+              <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 lg:p-10 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent">
+                <span className="text-primary text-[7px] md:text-[8px] font-black uppercase tracking-widest mb-1 block">{item.subtitle}</span>
+                <h3 className="text-2xl md:text-3xl font-black text-white italic uppercase tracking-tighter">{item.title}</h3>
               </div>
             </motion.div>
           ))}
