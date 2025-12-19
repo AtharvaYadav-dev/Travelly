@@ -1,13 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const Loader = ({ message = "Architecting Reality..." }) => {
+const Loader = ({ message = "Synthesizing Experience..." }) => {
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-950 overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="mesh-bg" />
-      </div>
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0b1120] overflow-hidden">
 
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -19,26 +15,26 @@ const Loader = ({ message = "Architecting Reality..." }) => {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 border-[2px] border-indigo-500/20 rounded-[3rem]"
+            className="absolute inset-0 border-[2px] border-primary/20 rounded-full"
           />
           <motion.div
             animate={{ rotate: -360 }}
             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-4 border-[2px] border-fuchsia-500/20 rounded-[2.5rem]"
+            className="absolute inset-4 border-[2px] border-primary/10 rounded-full"
           />
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-8 border-t-2 border-indigo-500 rounded-[2rem]"
+            className="absolute inset-8 border-t-2 border-primary rounded-full"
           />
 
           <div className="absolute inset-0 flex items-center justify-center">
             <motion.span
-              animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.1, 1] }}
+              animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.2, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="text-5xl"
+              className="text-4xl italic font-black text-primary"
             >
-              🧠
+              CH
             </motion.span>
           </div>
         </div>
@@ -48,25 +44,25 @@ const Loader = ({ message = "Architecting Reality..." }) => {
           <motion.h2
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-black italic tracking-tighter text-white mb-4 animate-reveal"
+            className="text-3xl md:text-5xl font-black italic tracking-tighter text-white uppercase mb-4"
           >
             {message}
           </motion.h2>
-          <div className="flex justify-center gap-1">
+          <div className="flex justify-center gap-2">
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
-                animate={{ opacity: [0, 1, 0] }}
+                animate={{ scale: [1, 1.5, 1], opacity: [0.3, 1, 0.3] }}
                 transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                className="w-2 h-2 rounded-full bg-indigo-500"
+                className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(255,122,45,0.8)]"
               />
             ))}
           </div>
         </div>
       </motion.div>
 
-      {/* Decorative Scanline */}
-      <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] z-50 opacity-20" />
+      {/* Background Noise */}
+      <div className="noise-bg opacity-5" />
     </div>
   );
 };

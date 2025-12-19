@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './store/useAuth';
 import Hero from './Hero';
-import Tooltip from './Tooltip';
 import Layout from './Layout';
 import Navbar from './Navbar';
-import AnimatedCursor from './AnimatedCursor';
+import CustomCursor from './CustomCursor';
+import LuxuryMesh from './LuxuryMesh';
 
 const App = () => {
   const navigate = useNavigate();
   const { user, init } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     init();
@@ -25,16 +27,23 @@ const App = () => {
 
   return (
     <Layout>
-      <AnimatedCursor />
+      <div className="noise-bg" />
+      <LuxuryMesh />
+      <CustomCursor />
       <Navbar user={user} onLogout={handleLogout} />
       <main className="flex-1 w-full relative">
-        {(() => {
-          const location = useLocation();
-          if (location.pathname === "/") {
-            return <Hero />;
-          }
-          return <div className="max-w-7xl mx-auto px-4"><Outlet /></div>;
-        })()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, scale: 0.98, filter: 'blur(20px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 1.02, filter: 'blur(20px)' }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full"
+          >
+            {location.pathname === "/" ? <Hero /> : <div className="max-w-[1600px] mx-auto min-h-screen px-6 py-12"><Outlet /></div>}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </Layout>
   );

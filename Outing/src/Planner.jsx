@@ -1,8 +1,43 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './supabase';
 import Notification from './Notification';
+import Magnetic from './Magnetic';
+
+const PremiumInput = ({ label, name, type = "text", placeholder, onChange, value, options }) => {
+  return (
+    <div className="space-y-3 group">
+      <label className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20 group-focus-within:text-primary transition-colors ml-1">
+        {label}
+      </label>
+      <div className="relative overflow-hidden rounded-xl">
+        {options ? (
+          <select
+            name={name}
+            onChange={onChange}
+            className="w-full bg-slate-900/50 border border-white/5 px-8 py-5 text-white/80 focus:outline-none focus:border-primary/50 transition-all font-medium italic appearance-none"
+          >
+            {options.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
+        ) : (
+          <input
+            type={type}
+            name={name}
+            placeholder={placeholder}
+            onChange={onChange}
+            className="w-full bg-slate-900/50 border border-white/5 px-8 py-5 text-white placeholder:text-white/10 focus:outline-none focus:border-primary/50 transition-all font-medium italic"
+          />
+        )}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          whileHover={{ scaleX: 1 }}
+          className="absolute bottom-0 left-0 right-0 h-px bg-primary origin-left"
+        />
+      </div>
+    </div>
+  );
+};
 
 const Planner = () => {
   const navigate = useNavigate();
@@ -29,7 +64,6 @@ const Planner = () => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
 
-    // Simple validation check
     const required = ['title', 'location', 'budget', 'participants', 'type', 'startDate', 'endDate'];
     for (let field of required) {
       if (!form[field]) {
@@ -44,7 +78,7 @@ const Planner = () => {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        setNotification({ type: 'error', message: 'Authentication required. Please login.' });
+        setNotification({ type: 'error', message: 'Session required. Please sign in.' });
         setLoading(false);
         return;
       }
@@ -61,7 +95,7 @@ const Planner = () => {
           startTime: form.startTime || '09:00',
           endTime: form.endTime || '21:00',
           location: form.location.trim(),
-          range: form.range || 'Day Explorer (25 KM)',
+          range: form.range || 'Swiss Explorer',
           user_id: user.id,
         }])
         .select()
@@ -71,209 +105,173 @@ const Planner = () => {
         setNotification({ type: 'error', message: `Database error: ${error.message}` });
       } else {
         localStorage.setItem('currentItinerary', JSON.stringify(data));
-        setNotification({ type: 'success', message: 'Architecting your masterpiece...' });
+        setNotification({ type: 'success', message: 'Creating your itinerary...' });
         setTimeout(() => navigate('/result'), 2000);
       }
     } catch (err) {
-      setNotification({ type: 'error', message: 'Failed to generate. Please check your connection.' });
+      setNotification({ type: 'error', message: 'Connection failed. Please try again.' });
     } finally {
       setLoading(false);
     }
   };
 
-  const sectionVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: (i) => ({
-      opacity: 1,
-      x: 0,
-      transition: { delay: i * 0.1, duration: 0.5 }
-    })
-  };
-
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 md:py-24">
+    <div className="min-h-screen bg-slate-950 pb-48">
       <Notification
         type={notification.type}
         message={notification.message}
         onClose={() => setNotification({ type: '', message: '' })}
       />
 
-      <div className="flex flex-col lg:flex-row gap-16 items-start">
-        {/* --- LEFT: FORM --- */}
-        <div className="flex-1 w-full order-2 lg:order-1">
-          <div className="mb-12">
-            <motion.h2
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-5xl md:text-7xl font-black mb-4 tracking-tighter"
-            >
-              The <span className="navbar-logo-gradient animate-gradient-text">Architect's</span> Studio
-            </motion.h2>
-            <p className="text-slate-500 text-lg font-medium">Design your next adventure with surgical precision.</p>
-          </div>
+      {/* Header Space */}
+      <div className="h-48" />
 
-          <form onSubmit={handleSubmit} className="space-y-16">
-            {/* Step 1 */}
-            <motion.div custom={1} variants={sectionVariants} initial="hidden" animate="visible" className="space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-500/20">01</div>
-                <h3 className="text-3xl font-black tracking-tight">Vibe & Location</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">Archive Title</label>
-                  <input name="title" onChange={handleChange} className="premium-input" placeholder="e.g. Operation: Santorini" />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">Drop Zone (Location)</label>
-                  <input name="location" onChange={handleChange} className="premium-input" placeholder="Which city?" />
-                </div>
-              </div>
-            </motion.div>
+      <div className="max-w-[1700px] mx-auto px-10">
+        <div className="flex flex-col xl:flex-row gap-32 items-start">
 
-            {/* Step 2 */}
-            <motion.div custom={2} variants={sectionVariants} initial="hidden" animate="visible" className="space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-fuchsia-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-fuchsia-500/20">02</div>
-                <h3 className="text-3xl font-black tracking-tight">Crew & Resources</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="space-y-3">
-                  <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">Total Unit (People)</label>
-                  <input name="participants" type="number" onChange={handleChange} className="premium-input" placeholder="How many?" />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">Mission Budget (₹)</label>
-                  <input name="budget" type="number" onChange={handleChange} className="premium-input" placeholder="Max budget" />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">Style</label>
-                  <select name="type" onChange={handleChange} className="premium-input">
-                    <option value="">Select Category</option>
-                    <option>Adventure</option>
-                    <option>Relaxation</option>
-                    <option>Food & Culture</option>
-                    <option>Family Fun</option>
-                    <option>Strategic Luxury</option>
-                  </select>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Step 3 */}
-            <motion.div custom={3} variants={sectionVariants} initial="hidden" animate="visible" className="space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-amber-500/20">03</div>
-                <h3 className="text-3xl font-black tracking-tight">Timeline Logistics</h3>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="space-y-3 col-span-2 sm:col-span-1">
-                  <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">Launch Date</label>
-                  <input name="startDate" type="date" onChange={handleChange} className="premium-input" />
-                </div>
-                <div className="space-y-3 col-span-2 sm:col-span-1">
-                  <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">Return Date</label>
-                  <input name="endDate" type="date" onChange={handleChange} className="premium-input" />
-                </div>
-                <div className="space-y-3 col-span-1">
-                  <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">Daily Start</label>
-                  <input name="startTime" type="time" onChange={handleChange} className="premium-input" placeholder="09:00" />
-                </div>
-                <div className="space-y-3 col-span-1">
-                  <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">Daily End</label>
-                  <input name="endTime" type="time" onChange={handleChange} className="premium-input" placeholder="21:00" />
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.button
-              type="submit"
-              disabled={loading}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full py-6 rounded-3xl bg-slate-950 text-white font-black text-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] hover:bg-slate-900 transition-all flex items-center justify-center gap-6 disabled:opacity-50"
-            >
-              {loading ? (
-                <div className="flex items-center gap-4">
-                  <span className="w-10 h-10 border-8 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Processing...</span>
-                </div>
-              ) : (
-                <>
-                  Commence AI Generation
-                  <span className="text-4xl">🔱</span>
-                </>
-              )}
-            </motion.button>
-          </form>
-        </div>
-
-        {/* --- RIGHT: LIVE PREVIEW --- */}
-        <aside className="lg:sticky lg:top-32 w-full lg:w-96 order-1 lg:order-2">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="glass-card p-1 bg-gradient-to-br from-indigo-500 to-fuchsia-500 shadow-2xl overflow-hidden"
-          >
-            <div className="bg-white dark:bg-slate-900 rounded-[1.9rem] p-8 h-full">
-              <div className="flex items-center justify-between mb-8">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600">LIVE PREVIEW</span>
-                <div className="flex gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                </div>
-              </div>
-
-              <div className="space-y-8">
-                <div>
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Trip Identity</h4>
-                  <h3 className="text-3xl font-black truncate">{form.title || 'Untitled Archive'}</h3>
-                  <p className="text-indigo-600 font-bold">{form.location || 'Orbiting Somewhere...'}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span className="text-[8px] font-black text-slate-400 block mb-1">BUDGET</span>
-                    <span className="text-xl font-black">₹{form.budget || '0'}</span>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <span className="text-[8px] font-black text-slate-400 block mb-1">CREW</span>
-                    <span className="text-xl font-black">{form.participants || '0'}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-500">CATEGORY</span>
-                    <span className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-tighter">
-                      {form.type || 'Draft'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-500">TIMELINE</span>
-                    <span className="text-[10px] font-black text-slate-800 dark:text-slate-200">
-                      {form.startDate ? `${form.startDate} ➔ ${form.endDate}` : 'Pending Selection'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
-                  <p className="text-[11px] text-slate-500 font-medium italic">
-                    Our high-fidelity Gen-AI will architect a specific timeline once you commit this data.
-                  </p>
-                </div>
-              </div>
+          {/* --- LEFT: ARCHITECT STUDIO --- */}
+          <div className="flex-1 w-full order-2 xl:order-1">
+            <div className="mb-24">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-6 mb-10"
+              >
+                <div className="w-2 h-16 bg-primary rounded-full shadow-primary-glow" />
+                <h2 className="text-7xl md:text-9xl font-black uppercase tracking-tighter italic text-white leading-none">
+                  Plan Your <br /> <span className="primary-gradient-text">Trip</span>
+                </h2>
+              </motion.div>
+              <p className="text-white/30 text-2xl font-medium max-w-3xl italic leading-relaxed">
+                Plan your next trip to Switzerland. Tell us your preferences and we'll create a personalized itinerary for you.
+              </p>
             </div>
-          </motion.div>
 
-          <div className="mt-8 flex items-center gap-4 px-4 opacity-50">
-            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xl">🛡️</div>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
-              Encrypted Mission Data. Your privacy is our prime directive.
-            </p>
+            <form onSubmit={handleSubmit} className="space-y-24">
+              {/* PHASE 01 */}
+              <div className="space-y-12">
+                <div className="flex items-center gap-6">
+                  <span className="text-[10px] font-black text-primary border border-primary/30 px-4 py-1 rounded-full">STEP 1</span>
+                  <h3 className="text-2xl font-black uppercase italic tracking-widest text-white">Trip Details</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <PremiumInput label="Trip Name" name="title" placeholder="e.g. Swiss Alps Adventure" onChange={handleChange} />
+                  <PremiumInput label="Location" name="location" placeholder="Which city or region?" onChange={handleChange} />
+                </div>
+              </div>
+
+              {/* PHASE 02 */}
+              <div className="space-y-12">
+                <div className="flex items-center gap-6">
+                  <span className="text-[10px] font-black text-primary border border-primary/30 px-4 py-1 rounded-full">STEP 2</span>
+                  <h3 className="text-2xl font-black uppercase italic tracking-widest text-white">Budget & Type</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                  <PremiumInput label="Number of Travelers" name="participants" type="number" placeholder="How many?" onChange={handleChange} />
+                  <PremiumInput label="Budget" name="budget" type="number" placeholder="USD ($)" onChange={handleChange} />
+                  <PremiumInput
+                    label="Trip Type"
+                    name="type"
+                    onChange={handleChange}
+                    options={['Select Type', 'Hiking Adventure', 'Skiing Retreat', 'Historic Discovery', 'Luxury Travel', 'Scenic Rail']}
+                  />
+                </div>
+              </div>
+
+              {/* PHASE 03 */}
+              <div className="space-y-12">
+                <div className="flex items-center gap-6">
+                  <span className="text-[10px] font-black text-primary border border-primary/30 px-4 py-1 rounded-full">STEP 3</span>
+                  <h3 className="text-2xl font-black uppercase italic tracking-widest text-white">Travel Dates</h3>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+                  <PremiumInput label="Start Date" name="startDate" type="date" onChange={handleChange} />
+                  <PremiumInput label="End Date" name="endDate" type="date" onChange={handleChange} />
+                  <PremiumInput label="Daily Start" name="startTime" type="time" onChange={handleChange} />
+                  <PremiumInput label="Daily End" name="endTime" type="time" onChange={handleChange} />
+                </div>
+              </div>
+
+              <div className="pt-12">
+                <Magnetic>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full btn-expensive bg-primary hover:bg-orange-600 border-none text-white text-base py-8 shadow-primary-glow"
+                  >
+                    {loading ? "Creating Itinerary..." : "Create My Trip"}
+                  </button>
+                </Magnetic>
+              </div>
+            </form>
           </div>
-        </aside>
+
+          {/* --- RIGHT: LIVE BLUEPRINT --- */}
+          <aside className="xl:sticky xl:top-48 w-full xl:w-[500px] order-1 xl:order-2">
+            <motion.div
+              layoutId="blueprint-card"
+              className="premium-glass p-16 rounded-[3rem] space-y-16 border-primary/5 shadow-2xl"
+            >
+              <div className="flex justify-between items-center pb-10 border-b border-white/5">
+                <div className="space-y-1">
+                  <span className="text-primary text-[10px] font-black uppercase tracking-[0.4em]">Trip Preview</span>
+                  <h4 className="text-xs font-bold text-white/30 uppercase tracking-widest">Status: Updating in real-time</h4>
+                </div>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                  className="w-10 h-10 border-2 border-dashed border-primary/40 rounded-full flex items-center justify-center italic font-black text-primary text-[10px]"
+                >
+                  T
+                </motion.div>
+              </div>
+
+              <div className="space-y-12">
+                <div className="relative group overflow-hidden rounded-2xl h-48 bg-slate-900 border border-white/5">
+                  <img
+                    src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800"
+                    className="w-full h-full object-cover opacity-20 grayscale scale-110 group-hover:scale-100 transition-all duration-[2s]"
+                    alt="Preview"
+                  />
+                  <div className="absolute inset-0 flex flex-col justify-center p-12">
+                    <span className="text-primary text-[9px] font-black uppercase tracking-[0.5em] mb-2">YOUR TRIP</span>
+                    <h3 className="text-4xl font-black text-white italic truncate uppercase tracking-tighter">
+                      {form.title || 'Untitled Trip'}
+                    </h3>
+                  </div>
+                  <div className="absolute top-0 right-0 p-4">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-12">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Location</span>
+                    <p className="text-xl font-black text-white italic">{form.location || '--'}</p>
+                  </div>
+                  <div className="space-y-2 text-right">
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Budget</span>
+                    <p className="text-xl font-black text-primary italic">${form.budget || '0,000'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Travelers</span>
+                    <p className="text-xl font-black text-white italic">{form.participants || '0'} People</p>
+                  </div>
+                  <div className="space-y-2 text-right">
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Type</span>
+                    <p className="text-[10px] font-black text-primary uppercase tracking-widest">{form.type || 'Standard'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-10 border-t border-white/5">
+                <p className="text-[11px] text-white/20 font-medium italic leading-relaxed">
+                  "We'll create a detailed day-by-day itinerary based on your preferences."
+                </p>
+              </div>
+            </motion.div>
+          </aside>
+        </div>
       </div>
     </div>
   );

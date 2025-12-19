@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase, isSupabaseConfigured } from './supabase';
 import { useNavigate } from 'react-router-dom';
 import Notification from './Notification';
-import FAB from './FAB';
 import Loader from './Loader';
+import Magnetic from './Magnetic';
 
 const Result = () => {
   const [formattedResponse, setFormattedResponse] = useState([]);
@@ -13,14 +13,7 @@ const Result = () => {
   const [aiResponse, setAiResponse] = useState('');
   const [savedData, setSavedData] = useState(null);
   const [notification, setNotification] = useState({ type: '', message: '' });
-  const [showFab, setShowFab] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const onScroll = () => setShowFab(window.scrollY > 400);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   const handleCopyPlan = async () => {
     try {
@@ -28,13 +21,13 @@ const Result = () => {
         ? formattedResponse.map(d => `--- ${d.title} ---\n${d.items.map(i => `• ${i}`).join('\n')}`).join('\n\n') + (costSummary.length ? `\n\n💰 Finance Summary:\n${costSummary.map(i => `• ${i}`).join('\n')}` : '')
         : '');
       if (!text) {
-        setNotification({ type: 'error', message: 'Mission data not found.' });
+        setNotification({ type: 'error', message: 'Plan data not found.' });
         return;
       }
       await navigator.clipboard.writeText(text);
-      setNotification({ type: 'success', message: 'Itinerary archived to clipboard!' });
+      setNotification({ type: 'success', message: 'Plan copied to clipboard.' });
     } catch (e) {
-      setNotification({ type: 'error', message: 'Sync failed.' });
+      setNotification({ type: 'error', message: 'Copy failed.' });
     }
   };
 
@@ -44,7 +37,7 @@ const Result = () => {
       setSavedData(saved);
       generateAI(saved);
     } else {
-      setAiResponse('No transmission found.');
+      setAiResponse('No plan found.');
       setLoading(false);
     }
   }, []);
@@ -64,14 +57,22 @@ const Result = () => {
           const blocks = day.split('\n')
             .map((line) => line.replace(/^[\*\#\-•🌟]+/, '').replace(/\*\*/g, '').trim())
             .filter((line) => line.length > 2);
-          return { title: `Day ${index + 1}`, items: blocks };
+          return {
+            title: `Day ${index + 1}`,
+            items: blocks,
+            image: `https://images.unsplash.com/photo-${1517048676732 + index}-d65bc937f952?q=80&w=1200`
+          };
         });
         if (days.length > 0 && days.some(d => d.items.length > 0)) break;
       }
     }
 
     if (days.length === 0) {
-      days = [{ title: 'Your Itinerary', items: [text.substring(0, 1000)] }];
+      days = [{
+        title: 'Swiss Journey',
+        items: [text.substring(0, 1000)],
+        image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200"
+      }];
     }
 
     const costLines = costText ? costText.split('\n').map((line) => line.replace(/^[-•🌟\*\#]+/, '').replace(/\*\*/g, '').trim()).filter((line) => line.length > 2) : [];
@@ -83,22 +84,21 @@ const Result = () => {
     const end = new Date(data.endDate);
     const totalDays = Math.min(7, Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1);
 
-    const prompt = `You are a high-end travel architect. Create a detailed ${totalDays}-day luxury itinerary for ${data.participants} people in ${data.location}.
+    const prompt = `You are a world-class Swiss travel planner. Create a detailed ${totalDays}-day itinerary for ${data.participants} people in ${data.location}.
 Title: ${data.title}
-Budget: ₹${data.budget}
-Type: ${data.type}
-Range: ${data.range}
+Budget: $${data.budget}
+Theme: ${data.type}
 
-Structure each day with 4-5 items using: "- [Time] Activity: Detail. (Cost: ₹X)"
-Stay within total ₹${data.budget}. Include secret local spots.
-End with "Cost Summary:".`;
+Structure each day with 4-5 items using: "- [Time] Activity: Detail. (Est: $X)"
+Ensure the total expenditure is within $${data.budget}. 
+End with a section called "Cost Summary:".`;
 
     try {
       setLoading(true);
       const key = import.meta.env.VITE_GEMINI_API_KEY;
       if (!key) throw new Error('API Key missing');
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
@@ -125,195 +125,203 @@ End with "Cost Summary:".`;
     }
   };
 
-  const handleDownloadPDF = () => {
-    import('jspdf').then(m => {
-      const doc = new m.jsPDF();
-      doc.setFontSize(24).text(savedData?.title || 'Trip Plan', 105, 20, { align: 'center' });
-      let y = 35;
-      formattedResponse.forEach(d => {
-        doc.setFontSize(16).setTextColor(99, 102, 241).text(d.title, 14, y);
-        y += 8;
-        doc.setFontSize(10).setTextColor(50, 50, 50);
-        d.items.forEach(i => {
-          if (y > 270) { doc.addPage(); y = 15; }
-          const lines = doc.splitTextToSize(`• ${i}`, 180);
-          doc.text(lines, 18, y);
-          y += lines.length * 5 + 2;
-        });
-        y += 8;
-      });
-      doc.save(`${savedData?.title}-Guide.pdf`);
-    });
-  };
-
   return (
-    <div className="w-full">
+    <div className="w-full bg-slate-950 min-h-screen text-white pb-48">
       <Notification
         type={notification.type}
         message={notification.message}
         onClose={() => setNotification({ type: '', message: '' })}
       />
 
-      {/* --- MASTER HERO --- */}
-      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden bg-slate-950">
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950" />
-          <div className="mesh-bg !opacity-20" />
-        </div>
+      {/* --- CINEMATIC HEADER --- */}
+      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, scale: 1.2 }}
+          animate={{ opacity: 0.3, scale: 1 }}
+          transition={{ duration: 2 }}
+          className="absolute inset-0"
+        >
+          <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2600" className="w-full h-full object-cover" alt="Swiss Alps" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/20 via-slate-950 to-slate-950" />
+        </motion.div>
 
-        <div className="relative z-10 text-center px-4 max-w-5xl">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 inline-block">
-            <span className="px-5 py-1.5 rounded-full glass-ui border-white/10 text-white text-[10px] font-black uppercase tracking-[0.4em]">Intelligence Report</span>
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-6xl md:text-9xl font-black text-white tracking-tighter mb-8 italic"
+        <div className="relative z-10 text-center px-6 max-w-[1400px]">
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mb-12"
           >
-            {savedData?.title || 'Mission Alpha'}
-          </motion.h1>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="flex flex-wrap justify-center gap-8 text-white font-black uppercase tracking-widest text-xs">
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-slate-500">Destination</span>
-              <span>{savedData?.location || 'Unknown'}</span>
-            </div>
-            <div className="w-px h-10 bg-white/10 hidden sm:block" />
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-slate-500">Inventory</span>
-              <span>₹{savedData?.budget || '0'}</span>
-            </div>
-            <div className="w-px h-10 bg-white/10 hidden sm:block" />
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-slate-500">Unit Size</span>
-              <span>{savedData?.participants || '1'} PAX</span>
-            </div>
+            <span className="text-primary font-black uppercase tracking-[1em] text-[10px] mb-8 block">AI GENERATED ITINERARY</span>
+            <h1 className="text-7xl md:text-[10rem] font-black uppercase italic tracking-tighter leading-none mb-12">
+              {savedData?.title || 'Your Trip'}
+            </h1>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            className="flex flex-wrap justify-center gap-16 md:gap-32 text-white/50 font-bold uppercase tracking-[0.3em] text-[11px]"
+          >
+            {[
+              { label: 'Region', val: savedData?.location || 'Alps' },
+              { label: 'Allocated', val: `$${savedData?.budget || '0'}` },
+              { label: 'Travelers', val: `${savedData?.participants || '1'} People` }
+            ].map((item, i) => (
+              <div key={i} className="flex flex-col items-center gap-4">
+                <span className="text-primary/60">{item.label}</span>
+                <span className="text-3xl text-white font-black italic tracking-tighter transition-all hover:text-primary">{item.val}</span>
+              </div>
+            ))}
           </motion.div>
         </div>
       </section>
 
-      {/* --- TOOLBAR --- */}
-      <div className="sticky top-20 z-40 w-full glass-ui py-4 border-b border-indigo-500/10 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center items-center gap-6">
-          <button onClick={() => navigate('/planner')} className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 transition-colors">
-            <span className="text-xl">🛠️</span> Configure
+      {/* --- INTERACTIVE ACTION BAR --- */}
+      <div className="sticky top-20 z-50 w-full backdrop-blur-3xl bg-slate-950/20 py-8 border-y border-white/5">
+        <div className="max-w-[1600px] mx-auto px-10 flex flex-wrap justify-between items-center gap-8">
+          <button onClick={() => navigate('/planner')} className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 hover:text-white transition-all flex items-center gap-4 group">
+            <span className="text-xl group-hover:-translate-x-2 transition-transform">←</span> Back to Planner
           </button>
-          <button onClick={handleDownloadPDF} className="btn-premium py-2.5 px-6 bg-slate-900 text-white text-xs tracking-widest uppercase font-black shadow-none ring-1 ring-white/10">
-            Download Dossier
-          </button>
-          <button onClick={handleCopyPlan} className="btn-premium py-2.5 px-6 glass-ui text-xs tracking-widest uppercase font-black border-slate-200">
-            Sync to Device
-          </button>
-          <button onClick={() => savedData && generateAI(savedData)} disabled={loading} className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 flex items-center gap-2 disabled:opacity-50">
-            {loading ? 'Processing...' : 'Recalibrate'} <span className="text-xl">🔄</span>
-          </button>
+          <div className="flex gap-6">
+            <Magnetic>
+              <button onClick={handleCopyPlan} className="btn-expensive bg-primary border-none shadow-primary-glow px-12">
+                Copy Plan
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button onClick={() => savedData && generateAI(savedData)} disabled={loading} className="btn-expensive bg-white/5 px-12">
+                {loading ? 'Regenerating...' : 'Regenerate'}
+              </button>
+            </Magnetic>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-24">
+      <div className="max-w-[1600px] mx-auto px-10 py-32">
         {loading ? (
-          <Loader message="Synthesizing Your Masterpiece..." />
+          <Loader message="Creating your itinerary..." />
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-12 gap-16">
-            {/* Timeline Left */}
-            <div className="xl:col-span-8 space-y-24">
-              <motion.div initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.2 } } }}>
-                {formattedResponse.map((day, i) => (
-                  <motion.div
-                    key={i}
-                    variants={{ hidden: { opacity: 0, x: -30 }, visible: { opacity: 1, x: 0 } }}
-                    className="group"
-                  >
-                    <div className="flex items-start gap-8 mb-16">
-                      <div className="hidden md:flex flex-col items-center">
-                        <div className="w-16 h-16 rounded-[2rem] bg-indigo-600 text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-indigo-500/30 group-hover:rotate-12 transition-transform">
-                          {i + 1}
-                        </div>
-                        <div className="w-1 h-32 bg-gradient-to-b from-indigo-500/20 to-transparent mt-4" />
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-32">
+
+            {/* --- TIMELINE FLUX --- */}
+            <div className="xl:col-span-8 space-y-48">
+              {formattedResponse.map((day, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="group relative"
+                >
+                  <div className="flex flex-col lg:flex-row gap-20">
+                    <div className="lg:w-24 flex flex-col items-center gap-6">
+                      <span className="text-5xl font-black text-primary/20 group-hover:text-primary transition-all duration-700 italic">0{i + 1}</span>
+                      <div className="w-px flex-1 bg-white/5 group-hover:bg-primary/20 transition-all duration-700" />
+                    </div>
+
+                    <div className="flex-1 space-y-16">
+                      <div className="flex items-center gap-6">
+                        <h3 className="text-5xl font-black uppercase italic tracking-tighter leading-none">{day.title}</h3>
+                        <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent" />
                       </div>
 
-                      <div className="flex-1 glass-card p-10 hover:border-indigo-500/30">
-                        <h3 className="text-4xl font-black mb-10 tracking-tighter flex items-center gap-4">
-                          <span className="text-indigo-500 opacity-30 text-2xl">Day</span>
-                          {day.title.replace(/Day\s*\d+/i, '').trim() || `Operational Phase ${i + 1}`}
-                        </h3>
-
-                        <div className="space-y-12">
-                          {day.items.map((item, j) => {
-                            const time = (item.match(/\[(.*?)\]/) || [])[1];
-                            const content = item.replace(/\[.*?\]/, '').trim();
-                            const [activity, ...details] = content.split(':');
-
-                            return (
-                              <div key={j} className="relative pl-6 border-l-2 border-slate-100 dark:border-slate-800">
-                                <div className="absolute -left-[5px] top-2 w-2 h-2 rounded-full bg-slate-300 group-hover:bg-indigo-500 transition-colors" />
-                                <div className="flex flex-col sm:flex-row gap-4 sm:items-start">
-                                  <div className="sm:w-32 flex-shrink-0">
-                                    <span className="text-xs font-black uppercase tracking-widest text-indigo-500">{time || '00:00'}</span>
-                                  </div>
-                                  <div>
-                                    <h4 className="text-xl font-bold mb-2 tracking-tight">{activity}</h4>
-                                    <p className="text-slate-500 text-lg leading-relaxed font-medium">{details.join(':')}</p>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
+                      <div className="relative rounded-[2.5rem] overflow-hidden aspect-video border border-white/5 group-hover:border-primary/20 shadow-2xl transition-all duration-1000">
+                        <motion.img
+                          whileHover={{ scale: 1.05 }}
+                          src={day.image}
+                          className="w-full h-full object-cover grayscale brightness-50 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-[2000ms]"
+                          alt={day.title}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent pointer-events-none" />
+                        <div className="absolute top-10 right-10 flex gap-2">
+                          {['TOPOGRAPHY', 'ACTIVE', 'PRIVATE'].map(tag => (
+                            <span key={tag} className="px-5 py-2 bg-white/10 backdrop-blur-md border border-white/10 text-[8px] font-black uppercase tracking-widest text-white/50 rounded-full">{tag}</span>
+                          ))}
                         </div>
+                        <div className="absolute bottom-12 left-12">
+                          <p className="text-primary text-[10px] font-black uppercase tracking-[0.5em] mb-4">Day Plan</p>
+                          <h4 className="text-3xl font-black uppercase italic text-white tracking-tighter max-w-lg">Swiss Adventure</h4>
+                        </div>
+                      </div>
+
+                      <div className="space-y-12 pl-4">
+                        {day.items.map((item, j) => (
+                          <motion.div
+                            key={j}
+                            className="relative flex gap-10 group/item py-2"
+                            whileHover={{ x: 10 }}
+                            transition={{ duration: 0.4 }}
+                          >
+                            <div className="w-2 h-2 rounded-full bg-primary mt-3 shadow-primary-glow group-hover/item:scale-150 transition-all" />
+                            <div className="flex-1 space-y-2">
+                              <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] group-hover/item:text-primary transition-all">
+                                {item.split(']')[0].replace('[', '') || 'Time'}
+                              </span>
+                              <p className="text-xl italic font-medium text-white/70 group-hover/item:text-white transition-all leading-relaxed">
+                                {item.split(']')[1] || item}
+                              </p>
+                            </div>
+                          </motion.div>
+                        ))}
                       </div>
                     </div>
-                  </motion.div>
-                ))}
-              </motion.div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
 
-            {/* Sidebar Right */}
-            <div className="xl:col-span-4 space-y-12">
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-card p-10 bg-slate-900 text-white shadow-3xl">
-                <div className="flex items-center gap-4 mb-10">
-                  <span className="text-4xl">💎</span>
-                  <h3 className="text-2xl font-black tracking-tight">Financial Analysis</h3>
-                </div>
+            {/* --- SIDEBAR INTELLIGENCE --- */}
+            <aside className="xl:col-span-4">
+              <div className="sticky top-48 space-y-16">
 
-                <div className="space-y-6">
-                  {costSummary.map((item, idx) => {
-                    const [label, val] = item.split(':');
-                    return (
-                      <div key={idx} className="flex justify-between items-center py-4 border-b border-white/5 last:border-0">
-                        <span className="text-slate-400 font-bold text-xs uppercase tracking-widest">{label}</span>
-                        <span className="text-xl font-black text-white">{val || item}</span>
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  className="premium-glass p-12 md:p-16 rounded-[2.5rem] relative overflow-hidden"
+                >
+                  <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-primary/5 blur-[100px] rounded-full" />
+                  <h3 className="text-xl font-black uppercase italic tracking-widest text-white mb-12 flex items-center gap-4">
+                    <span className="w-10 h-1px bg-primary" /> Budget Breakdown
+                  </h3>
+                  <div className="space-y-8">
+                    {costSummary.map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center py-5 border-b border-white/5 last:border-0 group/cost">
+                        <span className="text-white/20 text-[10px] font-black uppercase tracking-[0.3em] group-hover/cost:text-white/50 transition-all">{item.split(':')[0]}</span>
+                        <span className="text-2xl font-black text-primary italic tracking-tighter">{item.split(':')[1] || item}</span>
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                  <div className="mt-16 bg-white/5 p-8 rounded-2xl border border-white/5">
+                    <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] leading-relaxed italic text-center">
+                      "Cost estimates based on current Swiss tourism rates and accommodation prices."
+                    </p>
+                  </div>
+                </motion.div>
 
-                <div className="mt-12 p-6 rounded-2xl bg-indigo-600/20 border border-indigo-500/30">
-                  <p className="text-xs font-medium text-indigo-200 leading-relaxed italic">
-                    Finalized based on current market trends and personalized style preferences.
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  className="premium-glass p-12 rounded-[2rem] border-primary/10"
+                >
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-8">AI RECOMMENDATION</h4>
+                  <p className="text-white/50 italic text-lg leading-relaxed mb-10">
+                    "This itinerary balances adventure activities with relaxation time for an optimal travel experience."
                   </p>
-                </div>
-              </motion.div>
+                  <div className="flex items-center gap-6 pt-10 border-t border-white/5">
+                    <div className="w-12 h-12 rounded-full border border-primary/30 flex items-center justify-center p-1">
+                      <div className="w-full h-full rounded-full bg-primary/20 flex items-center justify-center italic font-black text-primary">T</div>
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Travelly AI Assistant</span>
+                  </div>
+                </motion.div>
 
-              <div className="p-8 glass-card border-slate-200/50">
-                <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Expert Verdict</h4>
-                <div className="flex gap-1 mb-4">
-                  {[1, 2, 3, 4, 5].map(i => <span key={i} className="text-indigo-600">★</span>)}
-                </div>
-                <p className="text-slate-500 font-medium leading-relaxed">
-                  "This route presents an optimal balance between cultural depth and luxury downtime.
-                  Target achieved."
-                </p>
-                <div className="mt-6 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-200" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Travelly AI Concierge</span>
-                </div>
               </div>
-            </div>
+            </aside>
           </div>
         )}
       </div>
-
-      <FAB show={showFab} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} label="Archived Top" />
     </div>
   );
 };

@@ -1,120 +1,113 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useMotionValue } from 'framer-motion';
-
-// Utility: checks if an element is clickable
-const isClickable = (el) => {
-  if (!el) return false;
-  const clickableTags = ['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'SELECT', 'LABEL'];
-  if (clickableTags.includes(el.tagName)) return true;
-  if (el.getAttribute('role') === 'button' || el.getAttribute('tabindex')) return true;
-  return el.classList.contains('cursor-pointer') || el.closest('button,a,[role=button],.cursor-pointer');
-};
-
-const STAR_COUNT = 18;
-const TRAIL_FADE_DURATION = 600; // ms
-const BASE_STAR_SIZE = 24; // Slightly bigger base size
-
-const StarSVG = ({ style, opacity, size = BASE_STAR_SIZE }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 32 32"
-    fill="none"
-    style={{ ...style, opacity }}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <g filter="url(#glow)">
-      <polygon
-        points="16,2 20,12 31,12 22,19 25,30 16,23 7,30 10,19 1,12 12,12"
-        fill="url(#blueGradient)"
-        stroke="#5ab6ff"
-        strokeWidth="1.5"
-        opacity="0.95"
-      />
-    </g>
-    <defs>
-      <filter id="glow" x="-8" y="-8" width="48" height="48" filterUnits="userSpaceOnUse">
-        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
-        <feMerge>
-          <feMergeNode in="coloredBlur" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-      <radialGradient id="blueGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-        <stop offset="0%" stopColor="#b6e0ff" stopOpacity="1" />
-        <stop offset="60%" stopColor="#5ab6ff" stopOpacity="0.85" />
-        <stop offset="100%" stopColor="#1e90ff" stopOpacity="0.7" />
-      </radialGradient>
-    </defs>
-  </svg>
-);
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const AnimatedCursor = () => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [trail, setTrail] = useState([]); // [{x, y, time}]
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClicking, setIsClicking] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
+  // Smooth springs for the outer ring
+  const springConfig = { damping: 25, stiffness: 200 };
+  const ringX = useSpring(mouseX, springConfig);
+  const ringY = useSpring(mouseY, springConfig);
+
   useEffect(() => {
-    const updateTrail = (e) => {
-      const now = Date.now();
-      setTrail((prev) =>
-        [
-          ...prev.filter((p) => now - p.time < TRAIL_FADE_DURATION),
-          { x: e.clientX, y: e.clientY, time: now },
-        ].slice(-STAR_COUNT)
-      );
-      mouseX.set(e.clientX - 16);
-      mouseY.set(e.clientY - 16);
+    const moveMouse = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
     };
-    document.addEventListener('mousemove', updateTrail);
+
+    const handleMouseDown = () => setIsClicking(true);
+    const handleMouseUp = () => setIsClicking(false);
+    const handleMouseEnter = () => setIsVisible(true);
+    const handleMouseLeave = () => setIsVisible(false);
+
+    // Check if hovering over clickable elements
+    const handleMouseOver = (e) => {
+      const target = e.target;
+      const isClickable =
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'A' ||
+        target.closest('button') ||
+        target.closest('a') ||
+        target.classList.contains('cursor-pointer');
+      setIsHovering(isClickable);
+    };
+
+    window.addEventListener('mousemove', moveMouse);
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mouseover', handleMouseOver);
+    document.addEventListener('mouseenter', handleMouseEnter);
+    document.addEventListener('mouseleave', handleMouseLeave);
+
     return () => {
-      document.removeEventListener('mousemove', updateTrail);
+      window.removeEventListener('mousemove', moveMouse);
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mouseover', handleMouseOver);
+      document.removeEventListener('mouseenter', handleMouseEnter);
+      document.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, [mouseX, mouseY]);
 
   useEffect(() => {
     document.body.style.cursor = 'none';
-    const hideCursor = () => setIsVisible(false);
-    const showCursor = () => setIsVisible(true);
-    document.addEventListener('mouseleave', hideCursor);
-    document.addEventListener('mouseenter', showCursor);
     return () => {
-      document.body.style.cursor = '';
-      document.removeEventListener('mouseleave', hideCursor);
-      document.removeEventListener('mouseenter', showCursor);
+      document.body.style.cursor = 'auto';
     };
   }, []);
 
   if (!isVisible) return null;
 
-  const now = Date.now();
   return (
     <>
-      {trail.map((point, idx) => {
-        const age = now - point.time;
-        const opacity = Math.max(0, 1 - age / TRAIL_FADE_DURATION);
-        const size = BASE_STAR_SIZE - idx * 0.3;
-        return (
-          <motion.div
-            key={point.time + '-' + idx}
-            style={{
-              position: 'fixed',
-              left: point.x - size / 2,
-              top: point.y - size / 2,
-              pointerEvents: 'none',
-              zIndex: 9999,
-              width: size,
-              height: size,
-              opacity,
-              filter: `drop-shadow(0 0 14px #5ab6ff)`,
-            }}
-            animate={{ opacity }}
-          >
-            <StarSVG opacity={opacity} size={size} />
-          </motion.div>
-        );
-      })}
+      {/* 📍 Main Dot */}
+      <motion.div
+        style={{
+          position: 'fixed',
+          left: mouseX,
+          top: mouseY,
+          width: 8,
+          height: 8,
+          backgroundColor: '#d4af37',
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          zIndex: 999999,
+          translateX: '-50%',
+          translateY: '-50%',
+          boxShadow: '0 0 15px rgba(212, 175, 55, 0.8)',
+        }}
+        animate={{
+          scale: isClicking ? 0.5 : (isHovering ? 1.5 : 1),
+          opacity: isVisible ? 1 : 0,
+        }}
+      />
+
+      {/* 💍 Luxury Outer Ring */}
+      <motion.div
+        style={{
+          position: 'fixed',
+          left: ringX,
+          top: ringY,
+          width: 40,
+          height: 40,
+          border: '1px solid rgba(212, 175, 55, 0.4)',
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          zIndex: 999998,
+          translateX: '-50%',
+          translateY: '-50%',
+        }}
+        animate={{
+          scale: isClicking ? 1.8 : (isHovering ? 2.2 : 1),
+          backgroundColor: isHovering ? 'rgba(212, 175, 55, 0.05)' : 'transparent',
+          borderColor: isClicking ? 'rgba(212, 175, 55, 0.8)' : (isHovering ? 'rgba(212, 175, 55, 0.6)' : 'rgba(212, 175, 55, 0.3)'),
+        }}
+      />
     </>
   );
 };

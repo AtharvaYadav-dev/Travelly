@@ -10,6 +10,7 @@ const Saved = lazy(() => import('./Saved'));
 const Result = lazy(() => import('./Result'));
 const Contact = lazy(() => import('./Contact'));
 const Profile = lazy(() => import('./Profile'));
+const Discover = lazy(() => import('./Discover'));
 
 import './index.css'; // Tailwind CSS (if you're using it)
 
@@ -33,6 +34,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <ProtectedRoute>
               <Suspense fallback={null}><Saved /></Suspense>
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="discover"
+          element={
+            <Suspense fallback={null}><Discover /></Suspense>
           }
         />
         <Route

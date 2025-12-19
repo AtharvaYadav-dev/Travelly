@@ -1,86 +1,153 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-
-const NavLink = ({ to, children }) => {
-  const location = useLocation();
-  const active = location.pathname === to;
-  return (
-    <Link
-      to={to}
-      className={`px-4 py-2 rounded-xl transition-all duration-300 text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap ${active
-        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-400'
-        : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
-        }`}
-    >
-      {children}
-    </Link>
-  );
-};
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
+import Magnetic from './Magnetic';
 
 const Navbar = ({ user, onLogout }) => {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navLinks = [
+    { name: 'INDEX', path: '/' },
+    { name: 'DISCOVER', path: '/discover' },
+    { name: 'PLANNER', path: '/planner' },
+    { name: 'SAVED', path: '/saved' },
+    { name: 'PROFILE', path: '/profile' }
+  ];
+
   return (
-    <header className="sticky top-0 z-[100] w-full glass-ui border-b border-indigo-500/5 transition-all duration-300 backdrop-blur-3xl shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
-      <div className="max-w-[1400px] mx-auto px-6 py-5 flex items-center justify-between">
-        {/* Brand */}
-        <Link to="/" className="flex items-center gap-4 group">
-          <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center shadow-2xl group-hover:rotate-[-8deg] transition-transform">
-            <span className="text-white text-2xl font-black italic">T</span>
-          </div>
-          <h1 className="text-3xl font-black tracking-tighter hidden sm:block">
-            <span className="navbar-logo-gradient animate-gradient-text">Travelly</span>
-          </h1>
-        </Link>
+    <>
+      <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-700 ${scrolled ? 'backdrop-blur-xl bg-slate-950/40 border-b border-white/5 py-3' : 'bg-transparent py-6'}`}>
+        <div className="max-w-[1600px] mx-auto px-6 md:px-10 flex items-center justify-between">
 
-        {/* Links */}
-        <nav className="hidden lg:flex items-center gap-3">
-          <NavLink to="/">HQ</NavLink>
-          <NavLink to="/planner">Architecture</NavLink>
-          <NavLink to="/saved">Archives</NavLink>
-        </nav>
+          {/* Luxury Brand */}
+          <Magnetic>
+            <Link to="/" className="group flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full border border-primary/30 flex items-center justify-center p-0.5 group-hover:border-primary transition-all duration-500">
+                <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center font-black italic text-primary text-[10px]">TR</div>
+              </div>
+              <span className="text-lg font-black tracking-[0.1em] text-white uppercase italic">Travelly<span className="text-primary">.</span></span>
+            </Link>
+          </Magnetic>
 
-        {/* Auth / User */}
-        <div className="flex items-center gap-6">
-          {user ? (
-            <div className="flex items-center gap-4">
-              <Link
-                to="/profile"
-                className="flex items-center gap-3 pl-1 pr-6 py-1 rounded-full bg-slate-100/50 border border-slate-200/50 hover:border-indigo-500 hover:bg-white transition-all shadow-sm"
-              >
-                <div className="w-10 h-10 rounded-full bg-slate-900 border-2 border-white flex items-center justify-center text-white font-black overflow-hidden shadow-lg">
-                  {user.user_metadata?.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="A" className="w-full h-full object-cover" />
-                  ) : (
-                    (user.user_metadata?.full_name || user.email || '?').charAt(0).toUpperCase()
-                  )}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Status: Active</span>
-                  <span className="font-black text-xs text-slate-900 leading-none">
-                    {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0]}
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <Magnetic key={link.name}>
+                <Link
+                  to={link.path}
+                  className="relative px-1 py-1 group"
+                >
+                  <span className={`text-sm font-black tracking-[0.2em] transition-all duration-500 ${location.pathname === link.path ? 'text-primary' : 'text-white/30 group-hover:text-white'}`}>
+                    {link.name}
                   </span>
-                </div>
-              </Link>
-              <button
-                onClick={onLogout}
-                className="w-12 h-12 rounded-2xl flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all border border-transparent hover:border-red-100"
-                title="Decommission Session"
-              >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+                  {location.pathname === link.path && (
+                    <motion.div
+                      layoutId="nav-dot"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 bg-primary rounded-full shadow-[0_0_5px_rgba(255,122,45,1)]"
+                    />
+                  )}
+                </Link>
+              </Magnetic>
+            ))}
+          </div>
+
+          {/* Right Section */}
+          <div className="flex items-center gap-8">
+            <div className="hidden sm:flex items-center gap-2 group cursor-none">
+              <span className="text-[8px] font-black text-white/20 group-hover:text-primary transition-all tracking-widest">EN</span>
+              <div className="w-1 h-1 rounded-full bg-primary/20 group-hover:bg-primary transition-all" />
             </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Link to="/login" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-indigo-600 transition-colors">Enter Archive</Link>
-              <Link to="/signup" className="btn-premium px-8 py-3 bg-slate-900 text-white text-[10px] uppercase font-black tracking-[0.2em] shadow-none">
-                Get Access
-              </Link>
-            </div>
-          )}
+
+            {user ? (
+              <div className="flex items-center gap-5">
+                <Magnetic>
+                  <Link to="/profile" className="w-5 h-5 rounded-full border border-white/5 p-0.5 hover:border-primary/40 transition-all">
+                    <div className="w-full h-full rounded-full overflow-hidden bg-slate-900 flex items-center justify-center">
+                      {user.user_metadata?.avatar_url ? (
+                        <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="User" />
+                      ) : (
+                        <span className="text-primary font-black italic text-[10px]">{(user.email || 'U').charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                  </Link>
+                </Magnetic>
+                <button onClick={onLogout} className="text-[8px] font-black text-white/10 hover:text-red-500 uppercase tracking-widest transition-all italic">Logout</button>
+              </div>
+            ) : (
+              <Magnetic>
+                <Link to="/login" className="px-6 py-2.5 bg-primary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-lg shadow-primary/10 active:scale-95 transition-all">
+                  Login
+                </Link>
+              </Magnetic>
+            )}
+
+            {/* Mobile Toggle */}
+            <button className="lg:hidden w-6 h-6 flex flex-col justify-center gap-1 group" onClick={() => setMobileMenuOpen(true)}>
+              <div className="w-full h-0.5 bg-white/60 group-hover:bg-primary transition-all" />
+              <div className="w-full h-0.5 bg-white/60 group-hover:bg-primary transition-all" />
+            </button>
+          </div>
         </div>
-      </div>
-    </header>
+
+        {/* Cinematic Scroll Progress Line */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-[1px] bg-primary/20 origin-left z-10"
+          style={{ scaleX }}
+        >
+          <div className="w-full h-full bg-primary shadow-[0_0_8px_rgba(255,122,45,0.5)]" />
+        </motion.div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-[200] flex flex-col items-center justify-center gap-10"
+          >
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute top-8 right-8 text-white/40 text-4xl hover:text-primary transition-all"
+            >
+              &times;
+            </button>
+            {navLinks.map((link, i) => (
+              <motion.div
+                key={link.name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * i }}
+              >
+                <Link
+                  to={link.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-4xl md:text-6xl font-black text-white hover:text-primary italic uppercase tracking-tighter"
+                >
+                  {link.name}
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

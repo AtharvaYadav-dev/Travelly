@@ -44,32 +44,33 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-[95vh] flex items-center justify-center p-4 py-20 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-full -z-10 bg-slate-50 dark:bg-slate-900" />
-      <div className="absolute top-1/4 -right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '3s' }} />
+    <div className="min-h-screen flex items-center justify-center p-4 py-20 relative overflow-hidden bg-slate-950">
+      {/* Premium Background Blobs */}
+      <div className="absolute top-20 right-10 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] animate-pulse" />
+      <div className="absolute bottom-20 left-10 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[140px] animate-pulse" style={{ animationDelay: '3s' }} />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card w-full max-w-2xl p-10 md:p-16 border-white/50 backdrop-blur-3xl shadow-[0_60px_120px_-30px_rgba(0,0,0,0.15)]"
+        className="premium-glass w-full max-w-2xl p-10 md:p-16 rounded-2xl relative z-10"
       >
         <div className="text-center mb-12">
           <Link to="/" className="inline-block group mb-8">
-            <div className="w-16 h-16 bg-slate-900 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-2xl group-hover:rotate-[-12deg] transition-transform">
-              <span className="text-white text-3xl font-black italic">T</span>
+            <div className="w-16 h-16 rounded-full border-2 border-primary/30 flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-primary/20 group-hover:border-primary group-hover:rotate-12 transition-all duration-500 p-1">
+              <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-primary text-2xl font-black italic">TR</span>
+              </div>
             </div>
           </Link>
-          <h2 className="text-5xl font-black tracking-tighter mb-4 italic">Begin Your <span className="navbar-logo-gradient animate-gradient-text">Odyssey</span></h2>
-          <p className="text-slate-500 font-medium tracking-tight">Register your credentials to access world-class AI travel architecture.</p>
+          <h2 className="text-5xl font-black tracking-tighter mb-4 italic text-white">Begin Your <span className="text-primary">Odyssey</span></h2>
+          <p className="text-white/40 font-medium tracking-tight">Register your credentials to access world-class AI travel architecture.</p>
         </div>
 
         {errorMsg && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mb-10 p-5 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-black flex items-center gap-4"
+            className="mb-10 p-5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold flex items-center gap-4"
           >
             <span className="text-xl">⚠️</span> {errorMsg}
           </motion.div>
@@ -77,7 +78,7 @@ const Signup = () => {
 
         <form onSubmit={handleSignup} className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Full Identity</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Full Identity</label>
             <input
               type="text"
               placeholder="Commander Doe"
@@ -89,7 +90,7 @@ const Signup = () => {
           </div>
 
           <div className="space-y-3">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Comm Link (Phone)</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Comm Link (Phone)</label>
             <input
               type="text"
               placeholder="+91 00000 00000"
@@ -101,10 +102,10 @@ const Signup = () => {
           </div>
 
           <div className="space-y-3 col-span-2">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Archive ID (Email)</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Archive ID (Email)</label>
             <input
               type="email"
-              placeholder="you@masterpiece.com"
+              placeholder="you@travelly.com"
               className="premium-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -113,7 +114,7 @@ const Signup = () => {
           </div>
 
           <div className="space-y-3 col-span-2">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Security Key</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Security Key</label>
             <input
               type="password"
               placeholder="••••••••"
@@ -127,11 +128,11 @@ const Signup = () => {
           <button
             type="submit"
             disabled={loading}
-            className="btn-premium btn-premium-primary w-full col-span-2 py-5 text-xl mt-4"
+            className="w-full col-span-2 px-12 py-5 bg-primary text-white text-sm font-black uppercase tracking-[0.3em] rounded-full shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all disabled:opacity-50 mt-4"
           >
             {loading ? (
               <div className="flex items-center justify-center gap-3">
-                <span className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
                 <span>Processing...</span>
               </div>
             ) : (
@@ -140,9 +141,9 @@ const Signup = () => {
           </button>
         </form>
 
-        <p className="mt-12 text-center text-slate-500 font-bold text-sm tracking-tight">
+        <p className="mt-12 text-center text-white/40 font-bold text-sm tracking-tight">
           Already archived?{' '}
-          <Link to="/login" className="text-indigo-600 hover:underline">Sign In</Link>
+          <Link to="/login" className="text-primary hover:text-orange-600 transition-colors">Sign In</Link>
         </p>
       </motion.div>
     </div>

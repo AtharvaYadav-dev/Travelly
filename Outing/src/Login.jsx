@@ -28,32 +28,33 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-[90vh] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-full -z-10 bg-slate-50 dark:bg-slate-900" />
-      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse" />
-      <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-fuchsia-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-950">
+      {/* Premium Background Blobs */}
+      <div className="absolute top-20 left-10 w-96 h-96 bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card w-full max-w-lg p-10 md:p-16 border-white/50 backdrop-blur-3xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)]"
+        className="premium-glass w-full max-w-lg p-10 md:p-16 rounded-2xl relative z-10"
       >
         <div className="text-center mb-12">
           <Link to="/" className="inline-block group mb-8">
-            <div className="w-16 h-16 bg-indigo-600 rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-indigo-500/30 group-hover:rotate-12 transition-transform">
-              <span className="text-white text-3xl font-black italic">T</span>
+            <div className="w-16 h-16 rounded-full border-2 border-primary/30 flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-primary/20 group-hover:border-primary transition-all duration-500 p-1">
+              <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-primary text-2xl font-black italic">TR</span>
+              </div>
             </div>
           </Link>
-          <h2 className="text-4xl font-black tracking-tighter mb-4 italic">Welcome <span className="navbar-logo-gradient animate-gradient-text">Adventurer</span></h2>
-          <p className="text-slate-500 font-medium">Continue your path to the unexplored.</p>
+          <h2 className="text-4xl font-black tracking-tighter mb-4 italic text-white">Welcome <span className="text-primary">Back</span></h2>
+          <p className="text-white/40 font-medium">Continue your journey to the unexplored.</p>
         </div>
 
         {errorMsg && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mb-8 p-5 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm font-black flex items-center gap-4"
+            className="mb-8 p-5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-bold flex items-center gap-4"
           >
             <span className="text-xl">⚠️</span> {errorMsg}
           </motion.div>
@@ -61,10 +62,10 @@ const Login = () => {
 
         <form onSubmit={handleLogin} className="space-y-8">
           <div className="space-y-3">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Archive ID (Email)</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Archive ID (Email)</label>
             <input
               type="email"
-              placeholder="you@masterpiece.com"
+              placeholder="you@travelly.com"
               className="premium-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -74,8 +75,8 @@ const Login = () => {
 
           <div className="space-y-3">
             <div className="flex justify-between items-center ml-1">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Security Key</label>
-              <a href="#" className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-700 transition-colors">Recover?</a>
+              <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30">Security Key</label>
+              <a href="#" className="text-xs font-bold uppercase tracking-widest text-primary hover:text-orange-600 transition-colors">Recover?</a>
             </div>
             <input
               type="password"
@@ -90,11 +91,11 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="btn-premium btn-premium-primary w-full text-xl py-5"
+            className="w-full px-12 py-5 bg-primary text-white text-sm font-black uppercase tracking-[0.3em] rounded-full shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all disabled:opacity-50"
           >
             {loading ? (
-              <div className="flex items-center gap-3">
-                <span className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="flex items-center justify-center gap-3">
+                <span className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
                 <span>Syncing...</span>
               </div>
             ) : (
@@ -103,9 +104,9 @@ const Login = () => {
           </button>
         </form>
 
-        <p className="mt-12 text-center text-slate-500 font-bold text-sm tracking-tight">
+        <p className="mt-12 text-center text-white/40 font-bold text-sm tracking-tight">
           First deployment?{' '}
-          <Link to="/signup" className="text-indigo-600 hover:underline">Register Dossier</Link>
+          <Link to="/signup" className="text-primary hover:text-orange-600 transition-colors">Register Dossier</Link>
         </p>
       </motion.div>
     </div>
