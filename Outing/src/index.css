@@ -215,7 +215,7 @@ h4,
 }
 
 .btn-premium-primary {
-  @apply bg-indigo-600 text-white shadow-[0_10px_30px_-10px_rgba(79, 70, 229, 0.5)] hover:bg-indigo-700 hover:shadow-[0_20px_40px_-15px_rgba(79, 70, 229, 0.6)] hover:-translate-y-1;
+  @apply bg-indigo-600 text-white shadow-[0_10px_30px_-10px_rgba(79,70,229,0.5)] hover:bg-indigo-700 hover:shadow-[0_20px_40px_-15px_rgba(79,70,229,0.6)] hover:-translate-y-1;
 }
 
 .btn-premium-secondary {
