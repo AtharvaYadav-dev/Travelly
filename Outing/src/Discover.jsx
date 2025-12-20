@@ -54,23 +54,7 @@ const Discover = () => {
 
   return (
     <div className="w-full min-h-screen bg-slate-950 text-white pb-32">
-      {/* 🎭 FLOATING BACKGROUND ELLS */}
-      <div className="fixed inset-0 pointer-events-none opacity-20 overflow-hidden z-0">
-        <motion.div
-          animate={{ x: [0, 50, 0], y: [0, 50, 0] }}
-          transition={{ duration: 15, repeat: Infinity }}
-          className="absolute top-[20%] right-[-10%] text-[20rem] font-black italic text-primary/10 select-none"
-        >
-          DISCOVER
-        </motion.div>
-        <motion.div
-          animate={{ x: [0, -50, 0], y: [0, -50, 0] }}
-          transition={{ duration: 12, repeat: Infinity }}
-          className="absolute bottom-[20%] left-[-10%] text-[20rem] font-black italic text-primary/10 select-none"
-        >
-          EXPLORE
-        </motion.div>
-      </div>
+
 
       {/* Header */}
       <section className="relative pt-48 pb-32 px-6 z-10">
@@ -83,7 +67,7 @@ const Discover = () => {
           >
             <span className="text-primary font-black uppercase tracking-[0.8em] text-[10px] mb-10 block">Featured Tours</span>
             <h1 className="text-8xl md:text-[10rem] font-black uppercase tracking-tighter italic leading-none mb-12">
-              Our <br /> <span className="primary-gradient-text">Tours</span>
+              <span className="text-white">Our</span> <br /> <span className="primary-gradient-text">Tours</span>
             </h1>
             <p className="max-w-2xl mx-auto text-white/40 text-lg font-medium italic leading-relaxed">
               Explore our collection of Swiss tours. Each trip is carefully planned to give you the best experience.
@@ -170,7 +154,7 @@ const Discover = () => {
             className="space-y-10"
           >
             <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
-              Join Our <span className="text-primary">Newsletter</span>
+              <span className="text-white">Join Our</span> <span className="text-primary">Newsletter</span>
             </h2>
             <p className="text-white/30 text-lg italic max-w-xl mx-auto">
               Get travel tips and updates from Switzerland, delivered to your inbox twice a month.

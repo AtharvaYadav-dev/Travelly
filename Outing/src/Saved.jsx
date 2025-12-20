@@ -3,12 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './supabase';
 import Magnetic from './Magnetic';
+import TripComparison from './components/TripComparison';
+import TravelPassport from './components/TravelPassport';
+import BucketList from './components/BucketList';
+import TripAnalytics from './components/TripAnalytics';
+import SmartFolders from './components/SmartFolders';
+import TripVersioning from './components/TripVersioning';
+import TripMerger from './components/TripMerger';
+import TravelPreferences from './components/TravelPreferences';
+import TravelJournal from './components/TravelJournal';
+import ReferralProgram from './components/ReferralProgram';
+import TripDuplication from './components/TripDuplication';
 
 const Saved = () => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const [showComparison, setShowComparison] = useState(false);
+  const [showPassport, setShowPassport] = useState(false);
+  const [showBucketList, setShowBucketList] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [selectedFolder, setSelectedFolder] = useState('all');
+  const [showVersioning, setShowVersioning] = useState(false);
+  const [showMerger, setShowMerger] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [showJournal, setShowJournal] = useState(false);
+  const [showReferral, setShowReferral] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -118,6 +140,78 @@ const Saved = () => {
               <option>Scenic Rail</option>
             </select>
           </motion.div>
+
+          {/* Action Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap gap-3 max-w-4xl mx-auto mt-6"
+          >
+            <button
+              onClick={() => setShowComparison(true)}
+              className="btn-expensive bg-white/5 px-6 py-3 text-sm"
+            >
+              ⚖️ Compare Trips
+            </button>
+
+            <button
+              onClick={() => setShowPassport(true)}
+              className="btn-expensive bg-white/5 px-6 py-3 text-sm"
+            >
+              🛂 My Passport
+            </button>
+
+            <button
+              onClick={() => setShowBucketList(true)}
+              className="btn-expensive bg-white/5 px-6 py-3 text-sm"
+            >
+              🎯 Bucket List
+            </button>
+
+            <button
+              onClick={() => setShowAnalytics(true)}
+              className="btn-expensive bg-white/5 px-6 py-3 text-sm"
+            >
+              📊 Analytics
+            </button>
+
+            <button
+              onClick={() => setShowMerger(true)}
+              className="btn-expensive bg-white/5 px-6 py-3 text-sm"
+            >
+              🔗 Merge Trips
+            </button>
+
+            <button
+              onClick={() => setShowPreferences(true)}
+              className="btn-expensive bg-white/5 px-6 py-3 text-sm"
+            >
+              ⚙️ Preferences
+            </button>
+
+            <button
+              onClick={() => setShowReferral(true)}
+              className="btn-expensive bg-white/5 px-6 py-3 text-sm"
+            >
+              🎁 Referral
+            </button>
+          </motion.div>
+
+          {/* Smart Folders */}
+          {!loading && itineraries.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-8"
+            >
+              <SmartFolders
+                trips={itineraries}
+                onFolderChange={(folderId) => setSelectedFolder(folderId)}
+              />
+            </motion.div>
+          )}
         </div>
 
         {/* Grid */}
@@ -215,6 +309,34 @@ const Saved = () => {
                           </div>
                         </div>
 
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => {
+                              setSelectedTrip(trip);
+                              setShowVersioning(true);
+                            }}
+                            className="flex-1 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all"
+                          >
+                            📝 Versions
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedTrip(trip);
+                              setShowJournal(true);
+                            }}
+                            className="flex-1 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all"
+                          >
+                            📔 Journal
+                          </button>
+                          <TripDuplication
+                            trip={trip}
+                            onDuplicate={(duplicated) => {
+                              setItineraries([...itineraries, duplicated]);
+                            }}
+                          />
+                        </div>
+
                         {/* Footer */}
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-bold text-[#FF6B35] uppercase tracking-wide group-hover:translate-x-2 transition-transform">
@@ -257,6 +379,91 @@ const Saved = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Feature Modals */}
+      <AnimatePresence>
+        {showComparison && (
+          <TripComparison
+            trips={itineraries}
+            onClose={() => setShowComparison(false)}
+          />
+        )}
+
+        {showPassport && (
+          <TravelPassport
+            userId={'guest'}
+            onClose={() => setShowPassport(false)}
+          />
+        )}
+
+        {showBucketList && (
+          <BucketList
+            userId={'guest'}
+            onClose={() => setShowBucketList(false)}
+          />
+        )}
+
+        {showAnalytics && (
+          <TripAnalytics
+            userId={'guest'}
+            onClose={() => setShowAnalytics(false)}
+          />
+        )}
+
+        {showVersioning && selectedTrip && (
+          <TripVersioning
+            tripId={selectedTrip.id}
+            tripData={selectedTrip}
+            onClose={() => {
+              setShowVersioning(false);
+              setSelectedTrip(null);
+            }}
+            onRestore={(restoredData) => {
+              const updated = itineraries.map(t =>
+                t.id === selectedTrip.id ? { ...t, ...restoredData } : t
+              );
+              setItineraries(updated);
+            }}
+          />
+        )}
+
+        {showMerger && (
+          <TripMerger
+            trips={itineraries}
+            onClose={() => setShowMerger(false)}
+            onMerge={(mergedTrip) => {
+              setItineraries([...itineraries, mergedTrip]);
+            }}
+          />
+        )}
+
+        {showPreferences && (
+          <TravelPreferences
+            userId={'guest'}
+            onClose={() => setShowPreferences(false)}
+            onSave={(prefs) => {
+              console.log('Preferences saved:', prefs);
+            }}
+          />
+        )}
+
+        {showJournal && selectedTrip && (
+          <TravelJournal
+            tripId={selectedTrip.id}
+            onClose={() => {
+              setShowJournal(false);
+              setSelectedTrip(null);
+            }}
+          />
+        )}
+
+        {showReferral && (
+          <ReferralProgram
+            userId={'guest'}
+            onClose={() => setShowReferral(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

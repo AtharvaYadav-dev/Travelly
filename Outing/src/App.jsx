@@ -7,6 +7,7 @@ import Layout from './Layout';
 import Navbar from './Navbar';
 import CustomCursor from './CustomCursor';
 import LuxuryMesh from './LuxuryMesh';
+import VoiceCommands from './components/VoiceCommands';
 
 const App = () => {
   const navigate = useNavigate();
@@ -45,6 +46,9 @@ const App = () => {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Voice Commands - Global */}
+      <VoiceCommands onCommand={(cmd) => console.log('Voice:', cmd)} />
     </Layout>
   );
 };

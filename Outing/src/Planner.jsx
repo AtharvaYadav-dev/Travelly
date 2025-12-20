@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './supabase';
 import Notification from './Notification';
 import Magnetic from './Magnetic';
+import { getBudgetSuggestion, getBudgetTier } from './utils/budgetSuggestions';
 
 const PremiumInput = ({ label, name, type = "text", placeholder, onChange, value, options }) => {
   return (
@@ -114,6 +115,27 @@ const Planner = () => {
       setLoading(false);
     }
   };
+
+  // Calculate form completion progress
+  const calculateProgress = () => {
+    const requiredFields = ['title', 'location', 'budget', 'participants', 'type', 'startDate', 'endDate'];
+    const filledFields = requiredFields.filter(field => form[field] && form[field] !== 'Select Type');
+    return Math.round((filledFields.length / requiredFields.length) * 100);
+  };
+
+  // Get budget suggestion based on location
+  const budgetSuggestion = useMemo(() => {
+    if (!form.location) return null;
+    const days = form.startDate && form.endDate
+      ? Math.ceil((new Date(form.endDate) - new Date(form.startDate)) / (1000 * 60 * 60 * 24)) + 1
+      : 5;
+    return getBudgetSuggestion(form.location, days);
+  }, [form.location, form.startDate, form.endDate]);
+
+  const budgetTier = useMemo(() => {
+    if (!form.budget || !form.location) return null;
+    return getBudgetTier(parseInt(form.budget), form.location);
+  }, [form.budget, form.location]);
 
   return (
     <div className="min-h-screen bg-slate-950 pb-48">

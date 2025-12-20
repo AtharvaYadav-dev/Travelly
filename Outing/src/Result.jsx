@@ -5,6 +5,22 @@ import { useNavigate } from 'react-router-dom';
 import Notification from './Notification';
 import Loader from './Loader';
 import Magnetic from './Magnetic';
+import { exportToPDF, shareViaEmail } from './utils/exportUtils';
+import { getActivityIcon, getCategoryColor } from './utils/activityIcons';
+import PackingListModal from './PackingListModal';
+import WeatherCard from './components/WeatherCard';
+import BudgetTracker from './components/BudgetTracker';
+import TripMap from './components/TripMap';
+import CurrencyConverter from './components/CurrencyConverter';
+import TravelChatbot from './components/TravelChatbot';
+import SocialShare from './components/SocialShare';
+import TranslationHelper from './components/TranslationHelper';
+import CollaborationModal from './components/CollaborationModal';
+import { fetchWeatherForecast } from './utils/weatherService';
+import { trackAchievement } from './utils/achievementSystem';
+import { MessageCircle, Share2, Globe, Users, DollarSign, Map } from 'lucide-react';
+import PrintVersion from './components/PrintVersion';
+import TimeTracker from './components/TimeTracker';
 
 const Result = () => {
   const [formattedResponse, setFormattedResponse] = useState([]);
@@ -13,6 +29,13 @@ const Result = () => {
   const [aiResponse, setAiResponse] = useState('');
   const [savedData, setSavedData] = useState(null);
   const [notification, setNotification] = useState({ type: '', message: '' });
+  const [showPackingList, setShowPackingList] = useState(false);
+  const [showBudgetTracker, setShowBudgetTracker] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(false);
+  const [showCollaboration, setShowCollaboration] = useState(false);
+  const [weatherData, setWeatherData] = useState([]);
   const navigate = useNavigate();
 
   const handleCopyPlan = async () => {
@@ -36,6 +59,19 @@ const Result = () => {
     if (saved) {
       setSavedData(saved);
       generateAI(saved);
+
+      // Load weather data
+      if (saved.location) {
+        fetchWeatherForecast(saved.location).then(weather => {
+          setWeatherData(weather);
+        });
+      }
+
+      // Track achievement
+      trackAchievement('guest', 'trip_created', {
+        budget: saved.budget,
+        type: saved.type
+      });
     } else {
       setAiResponse('No plan found.');
       setLoading(false);
@@ -84,42 +120,102 @@ const Result = () => {
     const end = new Date(data.endDate);
     const totalDays = Math.min(7, Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1);
 
-    const prompt = `You are a world-class Swiss travel planner. Create a detailed ${totalDays}-day itinerary for ${data.participants} people in ${data.location}.
-Title: ${data.title}
-Budget: $${data.budget}
-Theme: ${data.type}
+    // Enhanced prompt for better AI responses
+    const prompt = `You are an expert travel planner specializing in ${data.location}. Create a detailed ${totalDays}-day itinerary.
 
-Structure each day with 4-5 items using: "- [Time] Activity: Detail. (Est: $X)"
-Ensure the total expenditure is within $${data.budget}. 
-End with a section called "Cost Summary:".`;
+**Trip Details:**
+- Title: ${data.title}
+- Location: ${data.location}
+- Travelers: ${data.participants} people
+- Budget: $${data.budget} USD
+- Trip Type: ${data.type}
+- Dates: ${data.startDate} to ${data.endDate}
+
+**Instructions:**
+1. Create exactly ${totalDays} days of activities
+2. For each day, provide 4-6 time-specific activities
+3. Format each activity as: "[HH:MM AM/PM] Activity Name: Detailed description (Est: $XX)"
+4. Include breakfast, lunch, dinner, and attractions
+5. Stay within the total budget of $${data.budget}
+6. Match the ${data.type} theme
+7. End with a "Cost Summary:" section breaking down major expenses
+
+**Format Example:**
+Day 1
+[08:00 AM] Breakfast at Local Café: Start your day with traditional cuisine (Est: $15)
+[10:00 AM] Visit Historic Site: Explore the main attraction (Est: $30)
+
+Please generate the itinerary now:`;
 
     try {
       setLoading(true);
       const key = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!key) throw new Error('API Key missing');
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+      if (!key || key === 'your_gemini_api_key_here') {
+        throw new Error('⚠️ Gemini API Key not configured. Please add your API key to the .env file. Get one at: https://makersuite.google.com/app/apikey');
+      }
+
+      setNotification({ type: 'info', message: '🤖 AI is crafting your perfect itinerary...' });
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 8192,
+          }
+        }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+      }
+
       const result = await response.json();
-      if (result.error) throw new Error(result.error.message);
+
+      if (result.error) {
+        throw new Error(`Gemini API Error: ${result.error.message}`);
+      }
 
       const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) throw new Error('No response from AI brain.');
+
+      if (!text) {
+        throw new Error('No response generated. Please try again.');
+      }
 
       setAiResponse(text);
       const { days, costSummary } = formatAIResponse(text);
+
+      if (days.length === 0) {
+        throw new Error('Failed to parse itinerary. Please regenerate.');
+      }
+
       setFormattedResponse(days);
       setCostSummary(costSummary);
+      setNotification({ type: 'success', message: `✨ Your ${totalDays}-day itinerary is ready!` });
 
+      // Save to database if configured
       if (data.id && isSupabaseConfigured) {
         await supabase.from('itineraries').update({ ai_plan: text }).eq('id', data.id);
       }
     } catch (err) {
-      setNotification({ type: 'error', message: err.message });
+      console.error('AI Generation Error:', err);
+      setNotification({
+        type: 'error',
+        message: err.message || 'Failed to generate itinerary. Please check your API key and try again.'
+      });
+
+      // Set fallback content
+      setFormattedResponse([{
+        title: 'Error',
+        items: ['Unable to generate itinerary. Please check your internet connection and API key configuration.'],
+        image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200"
+      }]);
     } finally {
       setLoading(false);
     }
@@ -184,17 +280,58 @@ End with a section called "Cost Summary:".`;
           <button onClick={() => navigate('/planner')} className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 hover:text-white transition-all flex items-center gap-4 group">
             <span className="text-xl group-hover:-translate-x-2 transition-transform">←</span> Back to Planner
           </button>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-4">
             <Magnetic>
-              <button onClick={handleCopyPlan} className="btn-expensive bg-primary border-none shadow-primary-glow px-12">
+              <button onClick={handleCopyPlan} className="btn-expensive bg-primary border-none shadow-primary-glow px-8 text-sm">
                 Copy Plan
               </button>
             </Magnetic>
             <Magnetic>
-              <button onClick={() => savedData && generateAI(savedData)} disabled={loading} className="btn-expensive bg-white/5 px-12">
+              <button onClick={() => savedData && generateAI(savedData)} disabled={loading} className="btn-expensive bg-white/5 px-8 text-sm">
                 {loading ? 'Regenerating...' : 'Regenerate'}
               </button>
             </Magnetic>
+            <Magnetic>
+              <button onClick={() => savedData && exportToPDF(savedData, formattedResponse)} className="btn-expensive bg-white/5 px-8 text-sm">
+                📄 PDF
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button onClick={() => savedData && shareViaEmail(savedData, formattedResponse)} className="btn-expensive bg-white/5 px-8 text-sm">
+                📧 Email
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button onClick={() => setShowPackingList(true)} className="btn-expensive bg-white/5 px-8 text-sm">
+                🎒 Packing
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button onClick={() => setShowBudgetTracker(true)} className="btn-expensive bg-white/5 px-8 text-sm flex items-center gap-2">
+                <DollarSign className="w-4 h-4" /> Budget
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button onClick={() => setShowChatbot(true)} className="btn-expensive bg-white/5 px-8 text-sm flex items-center gap-2">
+                <MessageCircle className="w-4 h-4" /> AI Chat
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button onClick={() => setShowShare(true)} className="btn-expensive bg-white/5 px-8 text-sm flex items-center gap-2">
+                <Share2 className="w-4 h-4" /> Share
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button onClick={() => setShowTranslation(true)} className="btn-expensive bg-white/5 px-8 text-sm flex items-center gap-2">
+                <Globe className="w-4 h-4" /> Translate
+              </button>
+            </Magnetic>
+            <Magnetic>
+              <button onClick={() => setShowCollaboration(true)} className="btn-expensive bg-white/5 px-8 text-sm flex items-center gap-2">
+                <Users className="w-4 h-4" /> Collaborate
+              </button>
+            </Magnetic>
+            <PrintVersion itinerary={savedData} formattedResponse={formattedResponse} />
           </div>
         </div>
       </div>
@@ -322,6 +459,105 @@ End with a section called "Cost Summary:".`;
           </div>
         )}
       </div>
+
+      {/* Packing List Modal */}
+      <AnimatePresence>
+        {showPackingList && (
+          <PackingListModal
+            itinerary={savedData}
+            onClose={() => setShowPackingList(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Budget Tracker Modal */}
+      <AnimatePresence>
+        {showBudgetTracker && savedData && (
+          <BudgetTracker
+            itinerary={savedData}
+            onClose={() => setShowBudgetTracker(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* AI Chatbot Modal */}
+      <AnimatePresence>
+        {showChatbot && savedData && (
+          <TravelChatbot
+            itinerary={savedData}
+            onClose={() => setShowChatbot(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Social Share Modal */}
+      <AnimatePresence>
+        {showShare && savedData && (
+          <SocialShare
+            itinerary={savedData}
+            onClose={() => setShowShare(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Translation Helper Modal */}
+      <AnimatePresence>
+        {showTranslation && savedData && (
+          <TranslationHelper
+            destination={savedData.location}
+            onClose={() => setShowTranslation(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Collaboration Modal */}
+      <AnimatePresence>
+        {showCollaboration && savedData && (
+          <CollaborationModal
+            tripId={savedData.id}
+            tripData={savedData}
+            currentUser={{ id: 'guest', email: 'user@example.com' }}
+            onClose={() => setShowCollaboration(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Weather Cards - Add after itinerary */}
+      {weatherData.length > 0 && formattedResponse.length > 0 && (
+        <div className="max-w-[1600px] mx-auto px-10 py-16">
+          <h2 className="text-4xl font-black text-white uppercase mb-8">🌤️ Weather Forecast</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            {weatherData.slice(0, 5).map((weather, i) => (
+              <WeatherCard key={i} weather={weather} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Trip Map */}
+      {formattedResponse.length > 0 && savedData && (
+        <div className="max-w-[1600px] mx-auto px-10 py-16">
+          <TripMap
+            itinerary={savedData}
+            formattedResponse={formattedResponse}
+          />
+        </div>
+      )}
+
+      {/* Currency Converter */}
+      {savedData && (
+        <div className="max-w-[1600px] mx-auto px-10 py-16">
+          <CurrencyConverter
+            amount={savedData.budget || 1000}
+            baseCurrency="USD"
+          />
+        </div>
+      )}
+
+      {/* Time Tracker */}
+      {formattedResponse.length > 0 && (
+        <TimeTracker formattedResponse={formattedResponse} />
+      )}
     </div>
   );
 };

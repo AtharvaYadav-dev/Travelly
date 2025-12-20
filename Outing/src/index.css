@@ -1059,3 +1059,240 @@ a {
 [class*="opacity-30"] {
   opacity: 0.7 !important;
 }
+
+/* 🎯 TEXT SELECTION VISIBILITY */
+/* Ensure selected text is clearly visible with high contrast */
+
+/* Strongest possible selection rules */
+body ::selection,
+body *::selection,
+html ::selection,
+html *::selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+body ::-moz-selection,
+body *::-moz-selection,
+html ::-moz-selection,
+html *::-moz-selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+/* Global text selection - All browsers */
+::selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+::-moz-selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+/* Light theme selection */
+html[data-theme="light"] ::selection,
+html[data-theme="light"] *::selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html[data-theme="light"] ::-moz-selection,
+html[data-theme="light"] *::-moz-selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+/* Dark theme selection */
+html[data-theme="dark"] ::selection,
+html[data-theme="dark"] *::selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] ::-moz-selection,
+html[data-theme="dark"] *::-moz-selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+/* Input and textarea selection */
+input::selection,
+textarea::selection,
+select::selection,
+input *::selection,
+textarea *::selection,
+select *::selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+input::-moz-selection,
+textarea::-moz-selection,
+select::-moz-selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+}
+
+/* Specific element selections */
+p::selection,
+span::selection,
+div::selection,
+a::selection,
+h1::selection,
+h2::selection,
+h3::selection,
+h4::selection,
+h5::selection,
+h6::selection,
+li::selection,
+td::selection,
+th::selection,
+label::selection,
+button::selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+p::-moz-selection,
+span::-moz-selection,
+div::-moz-selection,
+a::-moz-selection,
+h1::-moz-selection,
+h2::-moz-selection,
+h3::-moz-selection,
+h4::-moz-selection,
+h5::-moz-selection,
+h6::-moz-selection,
+li::-moz-selection,
+td::-moz-selection,
+th::-moz-selection,
+label::-moz-selection,
+button::-moz-selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+/* Override any gradient text on selection */
+.gradient-text-primary::selection,
+.gradient-text-secondary::selection,
+.gradient-text-sunset::selection,
+.gradient-text-luxury::selection,
+[class*="gradient-text"]::selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+.gradient-text-primary::-moz-selection,
+.gradient-text-secondary::-moz-selection,
+.gradient-text-sunset::-moz-selection,
+.gradient-text-luxury::-moz-selection,
+[class*="gradient-text"]::-moz-selection {
+  background-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+/* 🦶 FOOTER TEXT - ALWAYS WHITE */
+/* Ensure footer text is white in both light and dark themes */
+
+footer,
+footer * {
+  color: white !important;
+}
+
+footer h1,
+footer h2,
+footer h3,
+footer h4,
+footer h5,
+footer h6 {
+  color: white !important;
+}
+
+footer p,
+footer span,
+footer a,
+footer li,
+footer div {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+footer a:hover {
+  color: #FF6B35 !important;
+}
+
+/* Ensure footer text is white in light theme */
+html[data-theme="light"] footer,
+html[data-theme="light"] footer * {
+  color: white !important;
+}
+
+html[data-theme="light"] footer h1,
+html[data-theme="light"] footer h2,
+html[data-theme="light"] footer h3,
+html[data-theme="light"] footer h4,
+html[data-theme="light"] footer h5,
+html[data-theme="light"] footer h6 {
+  color: white !important;
+}
+
+html[data-theme="light"] footer p,
+html[data-theme="light"] footer span,
+html[data-theme="light"] footer a,
+html[data-theme="light"] footer li,
+html[data-theme="light"] footer div {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html[data-theme="light"] footer a:hover {
+  color: #FF6B35 !important;
+}
+
+/* Ensure footer text is white in dark theme */
+html[data-theme="dark"] footer,
+html[data-theme="dark"] footer * {
+  color: white !important;
+}
+
+html[data-theme="dark"] footer h1,
+html[data-theme="dark"] footer h2,
+html[data-theme="dark"] footer h3,
+html[data-theme="dark"] footer h4,
+html[data-theme="dark"] footer h5,
+html[data-theme="dark"] footer h6 {
+  color: white !important;
+}
+
+html[data-theme="dark"] footer p,
+html[data-theme="dark"] footer span,
+html[data-theme="dark"] footer a,
+html[data-theme="dark"] footer li,
+html[data-theme="dark"] footer div {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+html[data-theme="dark"] footer a:hover {
+  color: #FF6B35 !important;
+}
