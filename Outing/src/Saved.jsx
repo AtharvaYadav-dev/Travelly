@@ -51,93 +51,109 @@ const Saved = () => {
     });
   }, [itineraries, query, typeFilter]);
 
+  // Get gradient based on trip type
+  const getGradient = (type) => {
+    const gradients = {
+      'Hiking Adventure': 'from-green-500/20 to-emerald-600/20',
+      'Skiing Retreat': 'from-blue-500/20 to-cyan-600/20',
+      'Historic Discovery': 'from-amber-500/20 to-orange-600/20',
+      'Luxury Travel': 'from-purple-500/20 to-pink-600/20',
+      'Scenic Rail': 'from-indigo-500/20 to-blue-600/20',
+      default: 'from-[#FF6B35]/20 to-[#F7931E]/20'
+    };
+    return gradients[type] || gradients.default;
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-white pb-64">
+    <div className="min-h-screen bg-[var(--bg-primary)] pb-32">
       {/* Header Space */}
-      <div className="h-48" />
+      <div className="h-32 md:h-40" />
 
-      <div className="max-w-[1700px] mx-auto px-10">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-10">
 
-        {/* --- DYNAMIC HEADER --- */}
-        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-24 mb-32">
-          <div className="max-w-4xl space-y-10">
-            <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }}>
-              <span className="text-primary font-black uppercase tracking-[0.8em] text-[10px] mb-8 block">SAVED TRIPS</span>
-              <h2 className="text-7xl md:text-[8rem] font-black uppercase tracking-tighter italic leading-[0.85] text-white">
-                Your <span className="primary-gradient-text">Saved</span> <br /> Trips
-              </h2>
-              <p className="text-white/30 text-2xl font-medium max-w-2xl italic leading-relaxed mt-12">
-                All your saved trips in one place. View past itineraries or create new ones.
-              </p>
-            </motion.div>
-          </div>
+        {/* Header */}
+        <div className="mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <span className="inline-block px-6 py-2 bg-[#FF6B35]/10 border border-[#FF6B35]/20 rounded-full text-[#FF6B35] text-sm font-bold uppercase tracking-wider mb-6">
+              Your Collection
+            </span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-[var(--text-primary)] uppercase tracking-tighter mb-6">
+              Saved <span className="gradient-text-primary">Trips</span>
+            </h1>
+            <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto">
+              All your travel plans in one beautiful place
+            </p>
+          </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}>
-            <Magnetic>
-              <button
-                onClick={() => navigate('/planner')}
-                className="btn-expensive bg-primary shadow-primary-glow border-none px-16 text-white"
-              >
-                Create New Trip
-              </button>
-            </Magnetic>
+          {/* Filters */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto"
+          >
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search your trips..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] py-4 px-6 rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] focus:outline-none focus:border-[#FF6B35] transition-all"
+              />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#FF6B35] text-sm">🔍</div>
+            </div>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="bg-[var(--bg-card)] border border-[var(--border-color)] px-6 py-4 rounded-xl text-[var(--text-primary)] focus:outline-none focus:border-[#FF6B35] transition-all min-w-[200px]"
+            >
+              <option value="">All Types</option>
+              <option>Hiking Adventure</option>
+              <option>Skiing Retreat</option>
+              <option>Luxury Travel</option>
+              <option>Scenic Rail</option>
+            </select>
           </motion.div>
         </div>
 
-        {/* --- REFINED FILTERS --- */}
-        <div className="flex flex-col md:flex-row gap-10 mb-24 premium-glass p-10 rounded-[2rem] border-white/5 shadow-2xl">
-          <div className="relative flex-1 group">
-            <input
-              type="text"
-              placeholder="SEARCH ARCHIVES..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full bg-slate-900/50 border border-white/5 py-5 px-10 rounded-full text-white placeholder:text-white/20 focus:outline-none focus:border-primary/50 transition-all font-black uppercase tracking-widest text-[10px]"
-            />
-            <div className="absolute right-10 top-1/2 -translate-y-1/2 text-primary font-black text-xs opacity-40">INDEX</div>
-          </div>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="bg-slate-900/50 border border-white/5 px-10 py-5 rounded-full text-white/40 focus:outline-none focus:border-primary/50 transition-all font-black uppercase tracking-[0.2em] text-[10px] appearance-none cursor-pointer"
-          >
-            <option value="">ALL TYPES</option>
-            <option>Hiking Adventure</option>
-            <option>Skiing Retreat</option>
-            <option>Luxury Travel</option>
-            <option>Scenic Rail</option>
-          </select>
-        </div>
-
-        {/* --- GRID --- */}
+        {/* Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[1, 2, 3].map(i => (
-              <div key={i} className="aspect-[4/5] rounded-[2.5rem] bg-slate-900/30 animate-pulse border border-white/5" />
+              <div key={i} className="aspect-[4/5] rounded-2xl bg-[var(--bg-card)] animate-pulse" />
             ))}
           </div>
         ) : filteredItineraries.length === 0 ? (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="py-56 text-center premium-glass rounded-[3rem]"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="py-32 text-center card-premium max-w-2xl mx-auto"
           >
-            <div className="text-8xl mb-12 opacity-20 filter grayscale">📁</div>
-            <h3 className="text-5xl font-black text-white mb-6 uppercase italic tracking-tighter">No Trips Found</h3>
-            <p className="text-white/20 text-xl font-medium mb-16 max-w-sm mx-auto italic">You haven't saved any trips yet.</p>
+            <div className="text-8xl mb-8 opacity-20">📁</div>
+            <h3 className="text-4xl font-black text-[var(--text-primary)] mb-4 uppercase tracking-tight">No Trips Found</h3>
+            <p className="text-[var(--text-secondary)] text-lg mb-12">Start planning your next adventure!</p>
             <Magnetic>
-              <button onClick={() => navigate('/planner')} className="btn-expensive bg-white/10 px-12">Create Your First Trip</button>
+              <button
+                onClick={() => navigate('/planner')}
+                className="btn-premium px-12 py-5"
+              >
+                Create Your First Trip
+              </button>
             </Magnetic>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <AnimatePresence>
               {filteredItineraries.map((trip, i) => (
                 <motion.div
                   key={trip.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: i * 0.1 }}
                   onClick={() => {
                     localStorage.setItem('currentItinerary', JSON.stringify(trip));
@@ -145,61 +161,100 @@ const Saved = () => {
                   }}
                   className="group relative cursor-pointer"
                 >
-                  <div className="premium-glass rounded-[3rem] p-12 h-full flex flex-col justify-between border-primary/5 hover:border-primary/20 transition-all duration-700 shadow-2xl perspective-1000">
-                    <div>
-                      <div className="flex justify-between items-center mb-12">
-                        <span className="px-6 py-2 rounded-full border border-primary/30 text-primary text-[9px] font-black uppercase tracking-[0.4em] shadow-lg">
-                          {trip.type || 'SWISS ALPHA'}
+                  {/* Card */}
+                  <div className="card-premium h-full overflow-hidden relative">
+                    {/* Gradient Background */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${getGradient(trip.type)} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+
+                    {/* Content */}
+                    <div className="relative z-10 p-8 h-full flex flex-col">
+                      {/* Header */}
+                      <div className="flex justify-between items-start mb-6">
+                        <span className="px-4 py-2 bg-[#FF6B35]/10 border border-[#FF6B35]/20 rounded-full text-[#FF6B35] text-xs font-bold uppercase tracking-wider">
+                          {trip.type || 'Adventure'}
                         </span>
                         <Magnetic>
                           <button
                             onClick={(e) => deleteItinerary(trip.id, e)}
-                            className="w-10 h-10 rounded-full border border-white/5 flex items-center justify-center text-white/20 hover:text-red-500 hover:border-red-500/30 transition-all text-xl"
+                            className="w-10 h-10 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-red-500 hover:border-red-500/30 transition-all"
                           >
-                            ×
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
                         </Magnetic>
                       </div>
 
-                      <div className="space-y-4">
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.6em] mb-2 block">Trip #{trip.id.toString().slice(-4)}</span>
-                        <h3 className="text-4xl md:text-5xl font-black mb-6 uppercase italic tracking-tighter whitespace-pre-wrap transition-all group-hover:text-primary leading-none">
+                      {/* Title */}
+                      <div className="flex-1 mb-6">
+                        <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block mb-3">
+                          Trip #{trip.id.toString().slice(-4)}
+                        </span>
+                        <h3 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] uppercase tracking-tighter mb-4 group-hover:text-[#FF6B35] transition-colors leading-tight">
                           {trip.title}
                         </h3>
-                        <div className="inline-flex items-center gap-4 text-primary text-[10px] font-black uppercase tracking-[0.4em]">
-                          <div className="w-8 h-px bg-primary" />
-                          {trip.location}
+                        <div className="flex items-center gap-3 text-[#FF6B35]">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="text-sm font-bold uppercase tracking-wide">{trip.location}</span>
+                        </div>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="border-t border-[var(--border-color)] pt-6">
+                        <div className="grid grid-cols-2 gap-6 mb-6">
+                          <div>
+                            <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Budget</p>
+                            <p className="text-2xl font-black text-[var(--text-primary)] tracking-tight">${trip.budget.toLocaleString()}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Travelers</p>
+                            <p className="text-2xl font-black text-[var(--text-primary)] tracking-tight">{trip.participants}</p>
+                          </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-[#FF6B35] uppercase tracking-wide group-hover:translate-x-2 transition-transform">
+                            View Details →
+                          </span>
+                          <span className="text-xs text-[var(--text-secondary)] uppercase tracking-wider">
+                            {new Date(trip.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-16 mt-16 border-t border-white/5">
-                      <div className="grid grid-cols-2 gap-10 mb-12">
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">Budget</p>
-                          <p className="text-3xl font-black text-white italic tracking-tighter">${trip.budget.toLocaleString()}</p>
-                        </div>
-                        <div className="text-right space-y-1">
-                          <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">Travelers</p>
-                          <p className="text-3xl font-black text-white italic tracking-tighter">{trip.participants} People</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Magnetic>
-                          <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em] group-hover:translate-x-4 transition-transform duration-500">
-                            View Details →
-                          </span>
-                        </Magnetic>
-                        <span className="text-[9px] font-black text-white/10 uppercase tracking-widest">
-                          {new Date(trip.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
-                        </span>
-                      </div>
+                    {/* Hover Glow Effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#FF6B35]/5 to-transparent" />
                     </div>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
+        )}
+
+        {/* Create New Trip Button */}
+        {!loading && filteredItineraries.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="text-center mt-16"
+          >
+            <Magnetic>
+              <button
+                onClick={() => navigate('/planner')}
+                className="btn-premium px-12 py-5"
+              >
+                + Create New Trip
+              </button>
+            </Magnetic>
+          </motion.div>
         )}
       </div>
     </div>

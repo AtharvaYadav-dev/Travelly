@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import Magnetic from './Magnetic';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = ({ user, onLogout }) => {
   const [scrolled, setScrolled] = useState(false);
@@ -30,16 +31,16 @@ const Navbar = ({ user, onLogout }) => {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-700 ${scrolled ? 'backdrop-blur-xl bg-slate-950/40 border-b border-white/5 py-3' : 'bg-transparent py-6'}`}>
+      <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-700 ${scrolled ? 'backdrop-blur-xl bg-[var(--glass-bg)] border-b border-[var(--border-color)] py-3' : 'bg-transparent py-6'}`}>
         <div className="max-w-[1600px] mx-auto px-6 md:px-10 flex items-center justify-between">
 
           {/* Luxury Brand */}
           <Magnetic>
             <Link to="/" className="group flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full border border-primary/30 flex items-center justify-center p-0.5 group-hover:border-primary transition-all duration-500">
-                <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center font-black italic text-primary text-[10px]">TR</div>
+              <div className="w-8 h-8 rounded-full border border-[#FF6B35]/30 flex items-center justify-center p-0.5 group-hover:border-[#FF6B35] transition-all duration-500">
+                <div className="w-full h-full rounded-full bg-[#FF6B35]/10 flex items-center justify-center font-black italic text-[#FF6B35] text-[10px]">TR</div>
               </div>
-              <span className="text-lg font-black tracking-[0.1em] text-white uppercase italic">Travelly<span className="text-primary">.</span></span>
+              <span className="text-lg font-black tracking-[0.1em] text-[var(--text-primary)] uppercase italic">Travelly<span className="text-[#FF6B35]">.</span></span>
             </Link>
           </Magnetic>
 
@@ -51,13 +52,13 @@ const Navbar = ({ user, onLogout }) => {
                   to={link.path}
                   className="relative px-1 py-1 group"
                 >
-                  <span className={`text-sm font-black tracking-[0.2em] transition-all duration-500 ${location.pathname === link.path ? 'text-primary' : 'text-white/30 group-hover:text-white'}`}>
+                  <span className={`text-sm font-black tracking-[0.2em] transition-all duration-500 ${location.pathname === link.path ? 'text-[#FF6B35]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'}`}>
                     {link.name}
                   </span>
                   {location.pathname === link.path && (
                     <motion.div
                       layoutId="nav-dot"
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 bg-primary rounded-full shadow-[0_0_5px_rgba(255,122,45,1)]"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0.5 h-0.5 bg-[#FF6B35] rounded-full shadow-[0_0_5px_rgba(255,107,53,1)]"
                     />
                   )}
                 </Link>
@@ -66,30 +67,33 @@ const Navbar = ({ user, onLogout }) => {
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4 md:gap-6">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             <div className="hidden sm:flex items-center gap-2 group cursor-none">
-              <span className="text-[8px] font-black text-white/20 group-hover:text-primary transition-all tracking-widest">EN</span>
-              <div className="w-1 h-1 rounded-full bg-primary/20 group-hover:bg-primary transition-all" />
+              <span className="text-[8px] font-black text-[var(--text-secondary)] group-hover:text-[#FF6B35] transition-all tracking-widest">EN</span>
+              <div className="w-1 h-1 rounded-full bg-[#FF6B35]/20 group-hover:bg-[#FF6B35] transition-all" />
             </div>
 
             {user ? (
-              <div className="flex items-center gap-5">
+              <div className="flex items-center gap-4 md:gap-5">
                 <Magnetic>
-                  <Link to="/profile" className="w-5 h-5 rounded-full border border-white/5 p-0.5 hover:border-primary/40 transition-all">
-                    <div className="w-full h-full rounded-full overflow-hidden bg-slate-900 flex items-center justify-center">
+                  <Link to="/profile" className="w-9 h-9 md:w-10 md:h-10 rounded-full border border-[#FF6B35]/20 p-0.5 hover:border-[#FF6B35]/40 transition-all">
+                    <div className="w-full h-full rounded-full overflow-hidden bg-[#FF6B35]/10 flex items-center justify-center">
                       {user.user_metadata?.avatar_url ? (
                         <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" alt="User" />
                       ) : (
-                        <span className="text-primary font-black italic text-[10px]">{(user.email || 'U').charAt(0).toUpperCase()}</span>
+                        <span className="text-[#FF6B35] font-black italic text-xs">{(user.email || 'U').charAt(0).toUpperCase()}</span>
                       )}
                     </div>
                   </Link>
                 </Magnetic>
-                <button onClick={onLogout} className="text-[8px] font-black text-white/10 hover:text-red-500 uppercase tracking-widest transition-all italic">Logout</button>
+                <button onClick={onLogout} className="hidden md:block text-[8px] font-black text-[var(--text-secondary)] hover:text-red-500 uppercase tracking-widest transition-all italic">Logout</button>
               </div>
             ) : (
               <Magnetic>
-                <Link to="/login" className="px-6 py-2.5 bg-primary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-lg shadow-primary/10 active:scale-95 transition-all">
+                <Link to="/login" className="px-6 py-2.5 bg-gradient-primary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-lg shadow-[#FF6B35]/10 active:scale-95 transition-all">
                   Login
                 </Link>
               </Magnetic>
@@ -97,18 +101,18 @@ const Navbar = ({ user, onLogout }) => {
 
             {/* Mobile Toggle */}
             <button className="lg:hidden w-6 h-6 flex flex-col justify-center gap-1 group" onClick={() => setMobileMenuOpen(true)}>
-              <div className="w-full h-0.5 bg-white/60 group-hover:bg-primary transition-all" />
-              <div className="w-full h-0.5 bg-white/60 group-hover:bg-primary transition-all" />
+              <div className="w-full h-0.5 bg-[var(--text-primary)]/60 group-hover:bg-[#FF6B35] transition-all" />
+              <div className="w-full h-0.5 bg-[var(--text-primary)]/60 group-hover:bg-[#FF6B35] transition-all" />
             </button>
           </div>
         </div>
 
         {/* Cinematic Scroll Progress Line */}
         <motion.div
-          className="absolute bottom-0 left-0 right-0 h-[1px] bg-primary/20 origin-left z-10"
+          className="absolute bottom-0 left-0 right-0 h-[1px] bg-[#FF6B35]/20 origin-left z-10"
           style={{ scaleX }}
         >
-          <div className="w-full h-full bg-primary shadow-[0_0_8px_rgba(255,122,45,0.5)]" />
+          <div className="w-full h-full bg-[#FF6B35] shadow-[0_0_8px_rgba(255,107,53,0.5)]" />
         </motion.div>
       </nav>
 

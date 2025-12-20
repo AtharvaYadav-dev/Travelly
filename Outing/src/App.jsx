@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './store/useAuth';
-import Hero from './Hero';
+import HeroNew from './HeroNew';
 import Layout from './Layout';
 import Navbar from './Navbar';
 import CustomCursor from './CustomCursor';
@@ -41,7 +41,7 @@ const App = () => {
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             className="w-full"
           >
-            {location.pathname === "/" ? <Hero /> : <div className="max-w-[1600px] mx-auto min-h-screen px-6 py-12"><Outlet /></div>}
+            {location.pathname === "/" ? <HeroNew /> : <div className="max-w-[1600px] mx-auto min-h-screen px-6 py-12"><Outlet /></div>}
           </motion.div>
         </AnimatePresence>
       </main>

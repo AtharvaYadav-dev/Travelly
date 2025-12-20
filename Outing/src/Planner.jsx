@@ -8,7 +8,7 @@ import Magnetic from './Magnetic';
 const PremiumInput = ({ label, name, type = "text", placeholder, onChange, value, options }) => {
   return (
     <div className="space-y-2 md:space-y-3 group">
-      <label className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-white/20 group-focus-within:text-primary transition-colors ml-1">
+      <label className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-white/70 group-focus-within:text-primary transition-colors ml-1">
         {label}
       </label>
       <div className="relative overflow-hidden rounded-lg md:rounded-xl">
@@ -16,9 +16,9 @@ const PremiumInput = ({ label, name, type = "text", placeholder, onChange, value
           <select
             name={name}
             onChange={onChange}
-            className="w-full bg-slate-900/50 border border-white/5 px-4 md:px-8 py-3 md:py-5 text-sm md:text-base text-white/80 focus:outline-none focus:border-primary/50 transition-all font-medium italic appearance-none"
+            className="w-full bg-slate-900/80 border border-white/20 px-4 md:px-8 py-3 md:py-5 text-sm md:text-base text-white focus:outline-none focus:border-primary/50 transition-all font-medium italic appearance-none"
           >
-            {options.map(o => <option key={o} value={o}>{o}</option>)}
+            {options.map(o => <option key={o} value={o} className="bg-slate-900 text-white">{o}</option>)}
           </select>
         ) : (
           <input
@@ -26,7 +26,7 @@ const PremiumInput = ({ label, name, type = "text", placeholder, onChange, value
             name={name}
             placeholder={placeholder}
             onChange={onChange}
-            className="w-full bg-slate-900/50 border border-white/5 px-4 md:px-8 py-3 md:py-5 text-sm md:text-base text-white placeholder:text-white/10 focus:outline-none focus:border-primary/50 transition-all font-medium italic"
+            className="w-full bg-slate-900/80 border border-white/20 px-4 md:px-8 py-3 md:py-5 text-sm md:text-base text-white placeholder:text-white/60 focus:outline-none focus:border-primary/50 transition-all font-medium italic"
           />
         )}
         <motion.div

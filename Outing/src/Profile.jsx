@@ -143,12 +143,12 @@ const Profile = () => {
               <div className="absolute top-0 left-0 w-full h-1.5 bg-primary" />
 
               <div className="relative z-10">
-                <div onClick={handleAvatarClick} className="relative w-28 h-28 mx-auto mb-10 cursor-pointer group">
+                <div onClick={handleAvatarClick} className="relative w-24 h-24 mx-auto mb-10 cursor-pointer group">
                   <div className={`w-full h-full rounded-full border-4 border-primary/20 p-1.5 overflow-hidden transition-all group-hover:border-primary ${uploading ? 'animate-pulse' : ''}`}>
                     {form.avatarUrl ? (
                       <img src={form.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
                     ) : (
-                      <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-5xl font-black italic text-primary">
+                      <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-4xl font-black italic text-primary">
                         {(form.fullName || user?.email || '?').charAt(0).toUpperCase()}
                       </div>
                     )}
