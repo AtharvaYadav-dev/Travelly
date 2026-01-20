@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate New API Key</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .step { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #007bff; }
+        .error { background: #f8d7da; border-left-color: #dc3545; }
+        .success { background: #d4edda; border-left-color: #28a745; }
+        .warning { background: #fff3cd; border-left-color: #ffc107; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px 5px; }
+        button:hover { background: #0056b3; }
+        .code { background: #f1f3f4; padding: 10px; border-radius: 5px; font-family: monospace; margin: 10px 0; }
+        .key-display { background: #e9ecef; padding: 15px; border-radius: 5px; font-family: monospace; word-break: break-all; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔑 Gemini API Key Issue Resolution</h1>
+    
+    <div class="step error">
+        <h3>❌ Current Issue: API Key Not Found</h3>
+        <p>The error "API Key not found" indicates one of these problems:</p>
+        <ul>
+            <li>The API key has expired or been revoked</li>
+            <li>The API key format is incorrect</li>
+            <li>The API key has reached its quota limit</li>
+            <li>The API key was not properly generated</li>
+        </ul>
+    </div>
+
+    <div class="step warning">
+        <h3>⚠️ Quick Fix: Generate New API Key</h3>
+        <p>The fastest solution is to generate a fresh API key:</p>
+        <ol>
+            <li>Click the button below to open Google AI Studio</li>
+            <li>Sign in with your Google account</li>
+            <li>Click "Create API Key"</li>
+            <li>Copy the new key (it should start with "AIzaSy")</li>
+            <li>Update your .env file with the new key</li>
+        </ol>
+        
+        <button onclick="window.open('https://makersuite.google.com/app/apikey', '_blank')">
+            🚀 Open Google AI Studio
+        </button>
+    </div>
+
+    <div class="step">
+        <h3>📝 Update Your .env File</h3>
+        <p>After getting your new API key, update your .env file:</p>
+        <div class="code">
+VITE_SUPABASE_URL=https://ppbobpctnabjbkbovgov.supabase.co<br>
+VITE_SUPABASE_ANON_KEY=sb_publishable_A0fK_4cRXn8EMaPzPQEu-A_-oq2vile<br>
+VITE_GEMINI_API_KEY=YOUR_NEW_API_KEY_HERE<br>
+GEMINI_API_KEY=YOUR_NEW_API_KEY_HERE
+        </div>
+        <p><strong>Important:</strong> Replace "YOUR_NEW_API_KEY_HERE" with your actual new API key.</p>
+    </div>
+
+    <div class="step">
+        <h3>🔄 Restart Development Server</h3>
+        <p>After updating the .env file, you MUST restart your development server:</p>
+        <div class="code">
+1. Stop the current server (Ctrl+C)<br>
+2. Run: npm run dev<br>
+3. Wait for it to fully start
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>🧪 Test New API Key</h3>
+        <p>Use this form to test your new API key:</p>
+        <input type="text" id="newApiKey" placeholder="Paste your new API key here" style="width: 100%; padding: 10px; margin: 10px 0;">
+        <button onclick="testNewKey()">Test New API Key</button>
+        <div id="testResult"></div>
+    </div>
+
+    <div class="step success">
+        <h3>✅ Verification Steps</h3>
+        <p>After fixing the API key:</p>
+        <ol>
+            <li>Open the browser developer console (F12)</li>
+            <li>Try generating an itinerary in the Travelly app</li>
+            <li>Look for success messages in the console</li>
+            <li>The app should show "✨ Your X-day itinerary is ready!"</li>
+        </ol>
+    </div>
+
+    <script>
+        function testNewKey() {
+            const apiKey = document.getElementById('newApiKey').value.trim();
+            const resultDiv = document.getElementById('testResult');
+            
+            if (!apiKey) {
+                resultDiv.innerHTML = '<div class="error">Please enter an API key</div>';
+                return;
+            }
+            
+            if (!apiKey.startsWith('AIzaSy')) {
+                resultDiv.innerHTML = '<div class="error">Invalid API key format. Should start with "AIzaSy"</div>';
+                return;
+            }
+            
+            if (apiKey.length !== 39) {
+                resultDiv.innerHTML = `<div class="error">Invalid API key length. Expected 39 characters, got ${apiKey.length}</div>`;
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="warning">Testing API key...</div>';
+            
+            // Test the API key
+            fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: "Hello, respond with just 'Working'" }] }],
+                    generationConfig: { maxOutputTokens: 50 }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class="error">❌ API Error: ${data.error.message}</div>`;
+                } else {
+                    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    resultDiv.innerHTML = `<div class="success">✅ API Key Works! Response: ${text}</div>`;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            });
+        }
+    </script>
+</body>
+</html>

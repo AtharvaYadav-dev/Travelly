@@ -15,114 +15,114 @@ const HeroNew = () => {
 
   // Statistics
   const stats = [
-    { number: "150+", label: "Destinations" },
-    { number: "50K+", label: "Happy Travelers" },
+    { number: "150+", label: "Desi Destinations" },
+    { number: "50K+", label: "Happy Ghumakkads" },
     { number: "4.9", label: "Average Rating" },
-    { number: "24/7", label: "Support" }
+    { number: "24/7", label: "Support Bhai" }
   ];
 
-  // Featured destinations with high-quality images
+  // Featured destinations with Indian context
   const destinations = [
     {
-      title: "Swiss Alps",
-      subtitle: "Mountain Paradise",
-      image: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800&q=80",
-      description: "Experience breathtaking peaks and pristine valleys",
-      price: "From $2,499"
+      title: "Manali-Leh",
+      subtitle: "Mountain Vibe",
+      image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=80",
+      description: "Bike trip vibes with snow-capped peaks & maggi points",
+      price: "From ₹19,999"
     },
     {
-      title: "Santorini",
-      subtitle: "Greek Islands",
-      image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800&q=80",
-      description: "Iconic white buildings and stunning sunsets",
-      price: "From $1,899"
+      title: "Goa",
+      subtitle: "Beach Party",
+      image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
+      description: "Freak out on beaches with cheap beer & seafood",
+      price: "From ₹12,999"
     },
     {
-      title: "Bali",
-      subtitle: "Tropical Paradise",
-      image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80",
-      description: "Lush rice terraces and ancient temples",
-      price: "From $1,599"
+      title: "Rajasthan",
+      subtitle: "Royal Swag",
+      image: "https://images.unsplash.com/photo-1524492442961-5688c919d4a8?w=800&q=80",
+      description: "Palaces, forts & desi ghee ka khana",
+      price: "From ₹15,999"
     },
     {
-      title: "Iceland",
-      subtitle: "Land of Fire & Ice",
-      image: "https://images.unsplash.com/photo-1504829857797-ddff29c27927?w=800&q=80",
-      description: "Northern lights and geothermal wonders",
-      price: "From $2,899"
+      title: "Kerala",
+      subtitle: "God's Own Country",
+      image: "https://images.unsplash.com/photo-1528127269322-539801943592?w=800&q=80",
+      description: "Backwaters, coconut water & peaceful vibes",
+      price: "From ₹18,999"
     },
     {
-      title: "Tokyo",
-      subtitle: "Modern Metropolis",
-      image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80",
-      description: "Blend of tradition and cutting-edge technology",
-      price: "From $2,199"
+      title: "Rishikesh",
+      subtitle: "Spiritual Trip",
+      image: "https://images.unsplash.com/photo-1594701040374-9929cdaf453c?w=800&q=80",
+      description: "Ganga arti, camping & adventure sports",
+      price: "From ₹8,999"
     },
     {
-      title: "Maldives",
-      subtitle: "Island Luxury",
-      image: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80",
-      description: "Crystal clear waters and overwater villas",
-      price: "From $3,499"
+      title: "Andaman",
+      subtitle: "Island Goals",
+      image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+      description: "Scuba diving & pristine beaches",
+      price: "From ₹25,999"
     }
   ];
 
-  // Travel experiences
+  // Travel experiences with Indian context
   const experiences = [
     {
       icon: "🏔️",
-      title: "Adventure Tours",
-      description: "Thrilling experiences for adrenaline seekers"
+      title: "Adventure Trips",
+      description: "Thrilling experiences for daredevils"
     },
     {
       icon: "🏖️",
-      title: "Beach Escapes",
-      description: "Relax on pristine shores worldwide"
+      title: "Beach Chills",
+      description: "Relax on beaches with chai & pakoda"
     },
     {
       icon: "🏛️",
-      title: "Cultural Journeys",
-      description: "Immerse in local traditions and history"
+      title: "Cultural Vibes",
+      description: "Explore desi traditions & history"
     },
     {
       icon: "🍷",
-      title: "Culinary Tours",
-      description: "Taste the world's finest cuisines"
+      title: "Food Tours",
+      description: "Taste the best desi street food"
     },
     {
       icon: "💎",
-      title: "Luxury Travel",
-      description: "Premium experiences and accommodations"
+      title: "Luxury Trips",
+      description: "Premium experiences for ballers"
     },
     {
       icon: "👨‍👩‍👧‍👦",
-      title: "Family Vacations",
-      description: "Memorable trips for all ages"
+      title: "Family Trips",
+      description: "Memorable trips for the whole fam"
     }
   ];
 
-  // Testimonials
+  // Testimonials with Indian names
   const testimonials = [
     {
-      name: "Sarah Johnson",
-      location: "New York, USA",
+      name: "Priya Sharma",
+      location: "Mumbai, Maharashtra",
       rating: 5,
-      text: "Absolutely incredible experience! The attention to detail and personalized itinerary made our Swiss Alps trip unforgettable.",
-      image: "https://i.pravatar.cc/150?img=1"
+      text: "Bhai maza aa gaya! Manali trip was lit AF. The AI planner nailed everything - from maggi points to hidden cafes. Highly recommend!",
+      image: "https://i.pravatar.cc/150?img=26"
     },
     {
-      name: "Michael Chen",
-      location: "Singapore",
+      name: "Rahul Verma",
+      location: "Delhi NCR",
       rating: 5,
-      text: "Best travel planning service I've ever used. Everything was seamless from booking to the actual trip.",
-      image: "https://i.pravatar.cc/150?img=13"
+      text: "Goa trip was next level! Everything was planned perfectly. Best part? Didn't have to worry about anything. Just vibes & chill!",
+      image: "https://i.pravatar.cc/150?img=3"
     },
     {
-      name: "Emma Williams",
-      location: "London, UK",
+      name: "Anjali Patel",
+      location: "Ahmedabad, Gujarat",
       rating: 5,
-      text: "The AI-powered recommendations were spot-on! Discovered hidden gems I would have never found on my own.",
-      image: "https://i.pravatar.cc/150?img=5"
+      text: "Rajasthan royal trip was amazing! Palaces, forts, and the food... waah! AI suggestions were spot on. Made memories for life!",
+      image: "https://i.pravatar.cc/150?img=9"
     }
   ];
 
@@ -157,7 +157,7 @@ const HeroNew = () => {
             className="mb-6"
           >
             <span className="inline-block px-6 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white text-sm font-bold uppercase tracking-wider">
-              ✨ AI-Powered Travel Planning
+              ✨ AI Se Trip Planning - Desi Style!
             </span>
           </motion.div>
 
@@ -168,9 +168,9 @@ const HeroNew = () => {
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-white leading-none tracking-tighter uppercase mb-6"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
-            Explore The
+            Ghumne Chale?
             <br />
-            <span className="gradient-text-sunset">World</span>
+            <span className="gradient-text-sunset">Bhai!</span>
           </motion.h1>
 
           <motion.p
@@ -179,7 +179,7 @@ const HeroNew = () => {
             transition={{ duration: 1, delay: 0.6 }}
             className="text-lg md:text-xl lg:text-2xl text-white/80 font-medium max-w-3xl mx-auto mb-12 leading-relaxed"
           >
-            Discover breathtaking destinations, create personalized itineraries, and embark on unforgettable journeys with our AI-powered travel companion.
+            Desi destinations, personalized itineraries, and unforgettable trips with our AI travel companion. Ab pakad lo backpack!
           </motion.p>
 
           <motion.div
@@ -193,7 +193,7 @@ const HeroNew = () => {
                 onClick={() => navigate('/planner')}
                 className="btn-premium px-10 py-5 text-base"
               >
-                Start Planning
+                Trip Planning Start Karo!
               </button>
             </Magnetic>
             <Magnetic>
@@ -201,7 +201,7 @@ const HeroNew = () => {
                 onClick={() => navigate('/discover')}
                 className="px-10 py-5 rounded-full font-bold uppercase tracking-wider text-sm bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all duration-500"
               >
-                Explore Destinations
+                Destinations Dekho
               </button>
             </Magnetic>
           </motion.div>
@@ -253,15 +253,15 @@ const HeroNew = () => {
             className="text-center mb-16"
           >
             <span className="inline-block px-6 py-2 bg-[#FF6B35]/10 border border-[#FF6B35]/20 rounded-full text-[#FF6B35] text-sm font-bold uppercase tracking-wider mb-6">
-              Popular Destinations
+              Trending Destinations
             </span>
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-[var(--text-primary)] uppercase tracking-tighter mb-6">
-              Where Will You
+              Kahan Jaoge?
               <br />
-              <span className="gradient-text-secondary">Go Next?</span>
+              <span className="gradient-text-secondary">Bhai!</span>
             </h2>
             <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-3xl mx-auto">
-              Handpicked destinations that offer unforgettable experiences
+              Handpicked destinations jo hain bilkul lit AF!
             </p>
           </motion.div>
 
@@ -316,7 +316,7 @@ const HeroNew = () => {
                 onClick={() => navigate('/discover')}
                 className="btn-premium"
               >
-                View All Destinations
+                Saare Destinations Dekho
               </button>
             </Magnetic>
           </motion.div>
@@ -334,12 +334,12 @@ const HeroNew = () => {
             className="text-center mb-16"
           >
             <span className="inline-block px-6 py-2 bg-[#4ECDC4]/10 border border-[#4ECDC4]/20 rounded-full text-[#4ECDC4] text-sm font-bold uppercase tracking-wider mb-6">
-              Travel Experiences
+              Trip Types
             </span>
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-[var(--text-primary)] uppercase tracking-tighter mb-6">
-              Your Perfect
+              Perfect Trip
               <br />
-              <span className="gradient-text-luxury">Adventure Awaits</span>
+              <span className="gradient-text-luxury">Awaits You!</span>
             </h2>
           </motion.div>
 
@@ -379,12 +379,12 @@ const HeroNew = () => {
             className="text-center mb-16"
           >
             <span className="inline-block px-6 py-2 bg-[#FFE66D]/10 border border-[#FFE66D]/20 rounded-full text-[#FFE66D] text-sm font-bold uppercase tracking-wider mb-6">
-              Testimonials
+              User Reviews
             </span>
             <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-[var(--text-primary)] uppercase tracking-tighter mb-6">
-              What Our Travelers
+              Log Kya Bolte?
               <br />
-              <span className="gradient-text-sunset">Say About Us</span>
+              <span className="gradient-text-sunset">Hamare Bare Mein!</span>
             </h2>
           </motion.div>
 

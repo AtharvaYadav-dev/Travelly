@@ -22,9 +22,9 @@ const Navbar = ({ user, onLogout }) => {
   }, []);
 
   const navLinks = [
-    { name: 'INDEX', path: '/' },
-    { name: 'DISCOVER', path: '/discover' },
-    { name: 'PLANNER', path: '/planner' },
+    { name: 'HOME', path: '/' },
+    { name: 'GHUMO', path: '/discover' },
+    { name: 'PLAN KARO', path: '/planner' },
     { name: 'SAVED', path: '/saved' },
     { name: 'PROFILE', path: '/profile' }
   ];

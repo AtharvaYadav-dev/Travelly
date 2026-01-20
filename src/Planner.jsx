@@ -5,11 +5,14 @@ import { supabase } from './supabase';
 import Notification from './Notification';
 import Magnetic from './Magnetic';
 import { getBudgetSuggestion, getBudgetTier } from './utils/budgetSuggestions';
+import { useTheme } from './contexts/ThemeContext';
 
 const PremiumInput = ({ label, name, type = "text", placeholder, onChange, value, options }) => {
+  const { theme } = useTheme();
+  
   return (
     <div className="space-y-2 md:space-y-3 group">
-      <label className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-white/70 group-focus-within:text-primary transition-colors ml-1">
+      <label className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em] transition-colors ml-1" style={{ color: 'var(--text-secondary)' }}>
         {label}
       </label>
       <div className="relative overflow-hidden rounded-lg md:rounded-xl">
@@ -17,7 +20,7 @@ const PremiumInput = ({ label, name, type = "text", placeholder, onChange, value
           <select
             name={name}
             onChange={onChange}
-            className="w-full bg-slate-900/80 border border-white/20 px-4 md:px-8 py-3 md:py-5 text-sm md:text-base text-white focus:outline-none focus:border-primary/50 transition-all font-medium italic appearance-none"
+            className={`w-full px-4 md:px-8 py-3 md:py-5 text-sm md:text-base focus:outline-none focus:border-primary/50 transition-all font-medium italic appearance-none premium-glass border`}
           >
             {options.map(o => <option key={o} value={o} className="bg-slate-900 text-white">{o}</option>)}
           </select>
@@ -27,7 +30,8 @@ const PremiumInput = ({ label, name, type = "text", placeholder, onChange, value
             name={name}
             placeholder={placeholder}
             onChange={onChange}
-            className="w-full bg-slate-900/80 border border-white/20 px-4 md:px-8 py-3 md:py-5 text-sm md:text-base text-white placeholder:text-white/60 focus:outline-none focus:border-primary/50 transition-all font-medium italic"
+            className={`w-full px-4 md:px-8 py-3 md:py-5 text-sm md:text-base focus:outline-none focus:border-primary/50 transition-all font-medium italic premium-glass border`}
+            style={{ color: 'var(--text-primary)' }}
           />
         )}
         <motion.div
@@ -42,6 +46,7 @@ const PremiumInput = ({ label, name, type = "text", placeholder, onChange, value
 
 const Planner = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [form, setForm] = useState({
     title: '',
     type: '',
@@ -68,7 +73,7 @@ const Planner = () => {
     const required = ['title', 'location', 'budget', 'participants', 'type', 'startDate', 'endDate'];
     for (let field of required) {
       if (!form[field]) {
-        setNotification({ type: 'error', message: `Please fill out the ${field} field.` });
+        setNotification({ type: 'error', message: `Bhai ${field} field toh bhar na re!` });
         return;
       }
     }
@@ -79,7 +84,7 @@ const Planner = () => {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        setNotification({ type: 'error', message: 'Session required. Please sign in.' });
+        setNotification({ type: 'error', message: 'Login karle pehle, bhai!' });
         setLoading(false);
         return;
       }
@@ -103,14 +108,14 @@ const Planner = () => {
         .single();
 
       if (error) {
-        setNotification({ type: 'error', message: `Database error: ${error.message}` });
+        setNotification({ type: 'error', message: `Database mein issue: ${error.message}` });
       } else {
         localStorage.setItem('currentItinerary', JSON.stringify(data));
-        setNotification({ type: 'success', message: 'Creating your itinerary...' });
+        setNotification({ type: 'success', message: 'Itinerary bana raha hai... wait kar!' });
         setTimeout(() => navigate('/result'), 2000);
       }
     } catch (err) {
-      setNotification({ type: 'error', message: 'Connection failed. Please try again.' });
+      setNotification({ type: 'error', message: 'Connection fail ho gaya. Try kar dobara!' });
     } finally {
       setLoading(false);
     }
@@ -138,7 +143,7 @@ const Planner = () => {
   }, [form.budget, form.location]);
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-48">
+    <div className="min-h-screen pb-48" style={{ background: 'var(--bg-primary)' }}>
       <Notification
         type={notification.type}
         message={notification.message}
@@ -160,12 +165,12 @@ const Planner = () => {
                 className="flex items-center gap-3 md:gap-6 mb-6 md:mb-10"
               >
                 <div className="w-1.5 md:w-2 h-12 md:h-16 bg-primary rounded-full shadow-primary-glow" />
-                <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-black uppercase tracking-tighter italic text-white leading-none">
-                  Plan Your <br /> <span className="primary-gradient-text">Trip</span>
+                <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-black uppercase tracking-tighter italic leading-none" style={{ color: 'var(--text-primary)' }}>
+                  <span className="text-primary">Trip Plan</span> <br /> <span className="primary-gradient-text">Karo Bhai!</span>
                 </h2>
               </motion.div>
-              <p className="text-white/30 text-base md:text-lg lg:text-2xl font-medium max-w-3xl italic leading-relaxed">
-                Plan your next trip to Switzerland. Tell us your preferences and we'll create a personalized itinerary for you.
+              <p className="text-base md:text-lg lg:text-2xl font-medium max-w-3xl italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                Apna next trip plan karo India mein! Bata preferences aur hum banayenge personalized itinerary for you.
               </p>
             </div>
 
@@ -174,11 +179,11 @@ const Planner = () => {
               <div className="space-y-6 md:space-y-12">
                 <div className="flex items-center gap-3 md:gap-6">
                   <span className="text-[8px] md:text-[10px] font-black text-primary border border-primary/30 px-3 md:px-4 py-1 rounded-full">STEP 1</span>
-                  <h3 className="text-lg md:text-2xl font-black uppercase italic tracking-widest text-white">Trip Details</h3>
+                  <h3 className="text-lg md:text-2xl font-black uppercase italic tracking-widest" style={{ color: 'var(--text-primary)' }}>Trip Ki Details</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
-                  <PremiumInput label="Trip Name" name="title" placeholder="e.g. Swiss Alps Adventure" onChange={handleChange} />
-                  <PremiumInput label="Location" name="location" placeholder="Which city or region?" onChange={handleChange} />
+                  <PremiumInput label="Trip Ka Name" name="title" placeholder="jaise. Manali Adventure" onChange={handleChange} />
+                  <PremiumInput label="Kahan Jaana Hai?" name="location" placeholder="Kaunsa city ya region?" onChange={handleChange} />
                 </div>
               </div>
 
@@ -186,16 +191,16 @@ const Planner = () => {
               <div className="space-y-6 md:space-y-12">
                 <div className="flex items-center gap-3 md:gap-6">
                   <span className="text-[8px] md:text-[10px] font-black text-primary border border-primary/30 px-3 md:px-4 py-1 rounded-full">STEP 2</span>
-                  <h3 className="text-lg md:text-2xl font-black uppercase italic tracking-widest text-white">Budget & Type</h3>
+                  <h3 className="text-lg md:text-2xl font-black uppercase italic tracking-widest" style={{ color: 'var(--text-primary)' }}>Budget & Type</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
-                  <PremiumInput label="Number of Travelers" name="participants" type="number" placeholder="How many?" onChange={handleChange} />
-                  <PremiumInput label="Budget" name="budget" type="number" placeholder="USD ($)" onChange={handleChange} />
+                  <PremiumInput label="Kitne Log Ja Rahe?" name="participants" type="number" placeholder="Kitne?" onChange={handleChange} />
+                  <PremiumInput label="Budget Kitna Hai?" name="budget" type="number" placeholder="₹ (INR)" onChange={handleChange} />
                   <PremiumInput
                     label="Trip Type"
                     name="type"
                     onChange={handleChange}
-                    options={['Select Type', 'Hiking Adventure', 'Skiing Retreat', 'Historic Discovery', 'Luxury Travel', 'Scenic Rail']}
+                    options={['Select Type', 'Adventure Trip', 'Beach Vibe', 'Historic Ghumo', 'Luxury Trip', 'Scenic Beauty', 'Pilgrimage', 'Food Tour']}
                   />
                 </div>
               </div>
@@ -204,13 +209,13 @@ const Planner = () => {
               <div className="space-y-6 md:space-y-12">
                 <div className="flex items-center gap-3 md:gap-6">
                   <span className="text-[8px] md:text-[10px] font-black text-primary border border-primary/30 px-3 md:px-4 py-1 rounded-full">STEP 3</span>
-                  <h3 className="text-lg md:text-2xl font-black uppercase italic tracking-widest text-white">Travel Dates</h3>
+                  <h3 className="text-lg md:text-2xl font-black uppercase italic tracking-widest" style={{ color: 'var(--text-primary)' }}>Trip Ki Dates</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
-                  <PremiumInput label="Start Date" name="startDate" type="date" onChange={handleChange} />
-                  <PremiumInput label="End Date" name="endDate" type="date" onChange={handleChange} />
-                  <PremiumInput label="Daily Start" name="startTime" type="time" onChange={handleChange} />
-                  <PremiumInput label="Daily End" name="endTime" type="time" onChange={handleChange} />
+                  <PremiumInput label="Kab Start Karu?" name="startDate" type="date" onChange={handleChange} />
+                  <PremiumInput label="Kab Khatam?" name="endDate" type="date" onChange={handleChange} />
+                  <PremiumInput label="Daily Start Time" name="startTime" type="time" onChange={handleChange} />
+                  <PremiumInput label="Daily End Time" name="endTime" type="time" onChange={handleChange} />
                 </div>
               </div>
 
@@ -221,7 +226,7 @@ const Planner = () => {
                     disabled={loading}
                     className="w-full btn-expensive bg-primary hover:bg-orange-600 border-none text-white text-sm md:text-base py-5 md:py-8 shadow-primary-glow"
                   >
-                    {loading ? "Creating Itinerary..." : "Create My Trip"}
+                    {loading ? "Itinerary bana raha hai..." : "Mera Trip Banao"}
                   </button>
                 </Magnetic>
               </div>
@@ -234,10 +239,10 @@ const Planner = () => {
               layoutId="blueprint-card"
               className="premium-glass p-6 md:p-10 lg:p-16 rounded-2xl md:rounded-3xl lg:rounded-[3rem] space-y-8 md:space-y-12 lg:space-y-16 border-primary/5 shadow-2xl"
             >
-              <div className="flex justify-between items-center pb-6 md:pb-10 border-b border-white/5">
+              <div className="flex justify-between items-center pb-6 md:pb-10 border-b" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="space-y-1">
                   <span className="text-primary text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em]">Trip Preview</span>
-                  <h4 className="text-[10px] md:text-xs font-bold text-white/30 uppercase tracking-widest">Status: Updating in real-time</h4>
+                  <h4 className="text-[10px] md:text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Status: Real-time mein update ho raha hai</h4>
                 </div>
                 <motion.div
                   animate={{ rotate: 360 }}
@@ -249,16 +254,16 @@ const Planner = () => {
               </div>
 
               <div className="space-y-8 md:space-y-12">
-                <div className="relative group overflow-hidden rounded-xl md:rounded-2xl h-40 md:h-48 bg-slate-900 border border-white/5">
+                <div className="relative group overflow-hidden rounded-xl md:rounded-2xl h-40 md:h-48 premium-glass border" style={{ borderColor: 'var(--border-color)' }}>
                   <img
                     src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=800"
                     className="w-full h-full object-cover opacity-20 grayscale scale-110 group-hover:scale-100 transition-all duration-[2s]"
                     alt="Preview"
                   />
                   <div className="absolute inset-0 flex flex-col justify-center p-6 md:p-12">
-                    <span className="text-primary text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] md:tracking-[0.5em] mb-2">YOUR TRIP</span>
-                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-white italic truncate uppercase tracking-tighter">
-                      {form.title || 'Untitled Trip'}
+                    <span className="text-primary text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] md:tracking-[0.5em] mb-2">TUMHARA TRIP</span>
+                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-black italic truncate uppercase tracking-tighter" style={{ color: 'var(--text-primary)' }}>
+                      {form.title || 'Naam Nahi Diya'}
                     </h3>
                   </div>
                   <div className="absolute top-0 right-0 p-3 md:p-4">
@@ -268,27 +273,27 @@ const Planner = () => {
 
                 <div className="grid grid-cols-2 gap-6 md:gap-12">
                   <div className="space-y-1 md:space-y-2">
-                    <span className="text-[9px] md:text-[10px] font-black text-white/20 uppercase tracking-widest">Location</span>
-                    <p className="text-lg md:text-xl font-black text-white italic">{form.location || '--'}</p>
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Location</span>
+                    <p className="text-lg md:text-xl font-black italic" style={{ color: 'var(--text-primary)' }}>{form.location || '--'}</p>
                   </div>
                   <div className="space-y-1 md:space-y-2 text-right">
-                    <span className="text-[9px] md:text-[10px] font-black text-white/20 uppercase tracking-widest">Budget</span>
-                    <p className="text-lg md:text-xl font-black text-primary italic">${form.budget || '0,000'}</p>
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Budget</span>
+                    <p className="text-lg md:text-xl font-black text-primary italic">₹{form.budget || '0,000'}</p>
                   </div>
                   <div className="space-y-1 md:space-y-2">
-                    <span className="text-[9px] md:text-[10px] font-black text-white/20 uppercase tracking-widest">Travelers</span>
-                    <p className="text-lg md:text-xl font-black text-white italic">{form.participants || '0'} People</p>
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Log Ja Rahe</span>
+                    <p className="text-lg md:text-xl font-black italic" style={{ color: 'var(--text-primary)' }}>{form.participants || '0'} Log</p>
                   </div>
                   <div className="space-y-1 md:space-y-2 text-right">
-                    <span className="text-[9px] md:text-[10px] font-black text-white/20 uppercase tracking-widest">Type</span>
+                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>Type</span>
                     <p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-widest">{form.type || 'Standard'}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-6 md:pt-10 border-t border-white/5">
-                <p className="text-[10px] md:text-[11px] text-white/20 font-medium italic leading-relaxed">
-                  "We'll create a detailed day-by-day itinerary based on your preferences."
+              <div className="pt-6 md:pt-10 border-t" style={{ borderColor: 'var(--border-color)' }}>
+                <p className="text-[10px] md:text-[11px] font-medium italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  "Hum banayenge detailed day-by-day itinerary tumhare preferences ke according."
                 </p>
               </div>
             </motion.div>

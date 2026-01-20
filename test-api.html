@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Gemini API Test</h1>
+    <button onclick="testAPI()">Test API Key</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const apiKey = 'AIzaSyAojMJ5fpGIwWXdFDNwjqxMsRacUrsJIxA';
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
+            
+            document.getElementById('result').innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Hello, respond with just 'API working'" }] }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 100,
+                        }
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(`API Error: ${result.error.message}`);
+                }
+
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (text) {
+                    document.getElementById('result').innerHTML = `<span style="color: green;">✅ Success: ${text}</span>`;
+                } else {
+                    document.getElementById('result').innerHTML = '<span style="color: orange;">⚠️ No response text received</span>';
+                }
+                
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                console.error('API Test Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

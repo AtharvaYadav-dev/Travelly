@@ -44,12 +44,12 @@ const Discover = () => {
   const navigate = useNavigate();
 
   const destinations = [
-    { title: "Zermatt", location: "Valais", price: "$4,500", type: "Climbing", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200", tag: "Popular" },
-    { title: "Saint-Moritz", location: "Graubünden", price: "$6,200", type: "Skiing", img: "https://images.unsplash.com/photo-1531310197839-ccf54634509e?q=80&w=1200", tag: "Premium" },
-    { title: "Interlaken", location: "Bernese Oberland", price: "$2,800", type: "Air Sports", img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=1200", tag: "Adventure" },
-    { title: "Lucerne", location: "Central Swiss", price: "$3,100", type: "Boat Tour", img: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=1200", tag: "Scenic" },
-    { title: "Verbier", location: "Val de Bagnes", price: "$5,100", type: "Photography", img: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200", tag: "Pro" },
-    { title: "Davos", location: "Graubünden", price: "$3,400", type: "Historic", img: "https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?q=80&w=1200", tag: "Heritage" },
+    { title: "Manali", location: "Himachal", price: "₹15,999", type: "Adventure", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200", tag: "Lit AF" },
+    { title: "Goa", location: "Konkan Coast", price: "₹12,999", type: "Beach Party", img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200", tag: "Vibes" },
+    { title: "Rishikesh", location: "Uttarakhand", price: "₹8,999", type: "Spiritual", img: "https://images.unsplash.com/photo-1594701040374-9929cdaf453c?q=80&w=1200", tag: "Peace" },
+    { title: "Kerala", location: "God's Own Country", price: "₹18,999", type: "Backwaters", img: "https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=1200", tag: "Nature" },
+    { title: "Rajasthan", location: "Royal State", price: "₹15,999", type: "Heritage", img: "https://images.unsplash.com/photo-1524492442961-5688c919d4a8?q=80&w=1200", tag: "Royal" },
+    { title: "Andaman", location: "Island Paradise", price: "₹25,999", type: "Scuba", img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1200", tag: "Goals" }
   ];
 
   return (
@@ -65,12 +65,12 @@ const Discover = () => {
             transition={{ duration: 1.2 }}
             className="text-center"
           >
-            <span className="text-primary font-black uppercase tracking-[0.8em] text-[10px] mb-10 block">Featured Tours</span>
+            <span className="text-primary font-black uppercase tracking-[0.8em] text-[10px] mb-10 block">Desi Tours</span>
             <h1 className="text-8xl md:text-[10rem] font-black uppercase tracking-tighter italic leading-none mb-12">
-              <span className="text-white">Our</span> <br /> <span className="primary-gradient-text">Tours</span>
+              <span className="text-white">Hamare</span> <br /> <span className="primary-gradient-text">Tours</span>
             </h1>
             <p className="max-w-2xl mx-auto text-white/40 text-lg font-medium italic leading-relaxed">
-              Explore our collection of Swiss tours. Each trip is carefully planned to give you the best experience.
+              Explore India ki best destinations! Har trip carefully planned hai tumhare liye.
             </p>
           </motion.div>
         </div>
@@ -113,7 +113,7 @@ const Discover = () => {
                         <h3 className="text-4xl font-black uppercase italic tracking-tighter text-white">{dest.title}</h3>
                       </div>
                       <div className="text-right">
-                        <span className="text-white/40 text-[9px] font-black uppercase block mb-1">From</span>
+                        <span className="text-white/40 text-[9px] font-black uppercase block mb-1">Starts From</span>
                         <span className="text-2xl font-black text-white italic">{dest.price}</span>
                       </div>
                     </div>
@@ -125,7 +125,7 @@ const Discover = () => {
                     {[1, 2, 3, 4, 5].map(s => <span key={s} className="text-primary text-[10px]">★</span>)}
                   </div>
                   <p className="text-white/40 text-sm italic font-medium leading-relaxed">
-                    Explore the best of the Swiss Alps with a personalized itinerary designed for your comfort and enjoyment.
+                    India ki best destinations explore karo with personalized itinerary designed just for you!
                   </p>
                   <div className="flex justify-center pt-4">
                     <Magnetic>
@@ -133,7 +133,7 @@ const Discover = () => {
                         onClick={() => navigate('/planner')}
                         className="btn-expensive bg-white/5 w-full md:w-auto"
                       >
-                        Book Now
+                        Book Karo
                       </button>
                     </Magnetic>
                   </div>
@@ -154,20 +154,20 @@ const Discover = () => {
             className="space-y-10"
           >
             <h2 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-white">
-              <span className="text-white">Join Our</span> <span className="text-primary">Newsletter</span>
+              <span className="text-white">Join Hamara</span> <span className="text-primary">Newsletter</span>
             </h2>
             <p className="text-white/30 text-lg italic max-w-xl mx-auto">
-              Get travel tips and updates from Switzerland, delivered to your inbox twice a month.
+              Travel tips aur updates India se, directly tumhare inbox mein twice a month.
             </p>
             <div className="flex flex-col md:flex-row gap-6 p-2 rounded-full border border-white/5 bg-slate-900/50 backdrop-blur-xl">
               <input
                 type="email"
-                placeholder="Your email address"
+                placeholder="Tumhara email address"
                 className="flex-1 bg-transparent border-none px-10 py-5 text-white placeholder:text-white/20 focus:outline-none italic"
               />
               <Magnetic>
                 <button className="px-12 py-5 bg-primary text-white font-black uppercase tracking-widest text-[11px] rounded-full shadow-2xl">
-                  Subscribe
+                  Subscribe Karo
                 </button>
               </Magnetic>
             </div>

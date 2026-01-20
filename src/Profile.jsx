@@ -14,13 +14,13 @@ const Profile = () => {
     fullName: '',
     phone: '',
     avatarUrl: '',
-    persona: 'Swiss Explorer',
+    persona: 'Desi Explorer',
     budgetFocus: 'Standard',
     preferences: []
   });
 
-  const personas = ['Swiss Explorer', 'Alpine Pro', 'Scenic Voyager', 'Luxury Traveler', 'Local Culture'];
-  const prefOptions = ['Hiking', 'Skiing', 'Railway', 'Elite Stays', 'Photography', 'Nightlife'];
+  const personas = ['Desi Explorer', 'Mountain Bhai', 'Scenic Lover', 'Luxury Traveler', 'Cultural Fan'];
+  const prefOptions = ['Trekking', 'Beach', 'Railway', 'Elite Stays', 'Photography', 'Nightlife', 'Foodie', 'Adventure'];
 
   useEffect(() => {
     if (user) {
@@ -28,7 +28,7 @@ const Profile = () => {
         fullName: user.user_metadata?.full_name || '',
         phone: user.user_metadata?.phone || '',
         avatarUrl: user.user_metadata?.avatar_url || '',
-        persona: user.user_metadata?.persona || 'Swiss Explorer',
+        persona: user.user_metadata?.persona || 'Desi Explorer',
         budgetFocus: user.user_metadata?.budget_focus || 'Standard',
         preferences: user.user_metadata?.preferences || []
       });

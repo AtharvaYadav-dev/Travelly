@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Key Check</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 20px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Gemini API Key Checker</h1>
+    
+    <h2>Test 1: Check API Key</h2>
+    <button onclick="testAPIKey()">Test Current API Key</button>
+    <div id="api-result"></div>
+
+    <h2>Test 2: Generate New API Key</h2>
+    <p>If the above test fails, you may need to generate a new API key:</p>
+    <ol>
+        <li>Go to <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></li>
+        <li>Sign in with your Google account</li>
+        <li>Click "Create API Key"</li>
+        <li>Copy the new key</li>
+        <li>Update your .env file with the new key</li>
+    </ol>
+
+    <h2>Test 3: Check Quota</h2>
+    <p>Check your API usage at <a href="https://console.cloud.google.com/ai" target="_blank">Google Cloud Console</a></p>
+
+    <script>
+        const API_KEY = 'AIzaSyAojMJ5fpGIwWXdFDNwjqxMsRacUrsJIxA';
+        
+        async function testAPIKey() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<div class="info">Testing API key...</div>';
+            
+            // Test 1: List available models
+            try {
+                const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`);
+                const modelsData = await modelsResponse.json();
+                
+                if (modelsResponse.ok) {
+                    resultDiv.innerHTML += '<div class="success">✅ API Key is valid</div>';
+                    resultDiv.innerHTML += `<div class="info">Available models: ${modelsData.models.length}</div>`;
+                } else {
+                    resultDiv.innerHTML += `<div class="error">❌ API Key Error: ${modelsData.error?.message || modelsData.statusText}</div>`;
+                    return;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">❌ Network Error: ${error.message}</div>`;
+                return;
+            }
+            
+            // Test 2: Try to generate content
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Hello, respond with just 'API working'" }] }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 100,
+                        }
+                    }),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    resultDiv.innerHTML += `<div class="success">✅ Content Generation: ${text}</div>`;
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML += `<div class="error">❌ Content Generation Error: ${errorData.error?.message || response.statusText}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">❌ Content Generation Network Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-run test
+        window.onload = function() {
+            testAPIKey();
+        };
+    </script>
+</body>
+</html>

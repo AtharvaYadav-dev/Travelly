@@ -10,7 +10,7 @@ const PackingListModal = ({ isOpen, onClose, itineraryData }) => {
   const generatePackingList = async () => {
     setLoading(true);
 
-    const prompt = `Generate a comprehensive packing list for a trip with these details:
+    const prompt = `Generate a comprehensive and detailed packing list for a trip with these details:
     
 **Trip Information:**
 - Destination: ${itineraryData?.location}
@@ -18,47 +18,53 @@ const PackingListModal = ({ isOpen, onClose, itineraryData }) => {
 - Trip Type: ${itineraryData?.type}
 - Travelers: ${itineraryData?.participants} people
 - Dates: ${itineraryData?.startDate} to ${itineraryData?.endDate}
+- Budget: ₹${itineraryData?.budget}
 
 **Instructions:**
-Create a categorized packing list with these categories:
-1. Clothing
-2. Toiletries & Personal Care
-3. Electronics & Gadgets
-4. Documents & Money
-5. Health & Safety
-6. Activity-Specific Gear
-7. Miscellaneous
+Create a highly detailed categorized packing list with these categories:
+1. Clothing (with specific quantities and weather-appropriate items)
+2. Toiletries & Personal Care (travel-sized essentials)
+3. Electronics & Gadgets (with chargers and accessories)
+4. Documents & Money (including digital and physical copies)
+5. Health & Safety (first aid, medications, emergency items)
+6. Activity-Specific Gear (based on trip type)
+7. Indian Essentials (local context items)
+8. Food & Snacks (travel-friendly options)
+9. Miscellaneous (often forgotten items)
 
-For each category, list 5-10 essential items specific to this destination and trip type.
+For each category, list 8-12 specific items with brief descriptions and quantities where relevant.
+Consider weather, local culture, and practical needs for ${itineraryData?.location}.
+Include Indian context like power adapters, local SIM cards, etc.
+
 Format as:
 Category Name
-- Item 1
-- Item 2
+- Item with specific details (quantity/purpose)
+- Another item with description
 ...`;
 
     try {
-      const key = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!key) throw new Error('API Key not configured');
+      const key = import.meta.env.VITE_GROQ_API_KEY;
+      if (!key) throw new Error('Groq API Key not configured');
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`,
+        `https://api.groq.com/openai/v1/chat/completions`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': `Bearer ${key}`,
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.7,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 2048,
-            },
+            model: 'llama-3.1-8b-instant',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.7,
+            max_tokens: 3072,
           }),
         }
       );
 
       const result = await response.json();
-      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const text = result?.choices?.[0]?.message?.content;
 
       if (!text) throw new Error('No response from AI');
 

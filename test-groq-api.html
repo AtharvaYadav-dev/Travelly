@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Groq API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 20px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🦊 Groq API Test</h1>
+    
+    <h2>Test Your New API Key</h2>
+    <button onclick="testGroqAPI()">Test Groq API Key</button>
+    <div id="result"></div>
+
+    <script>
+        const GROQ_API_KEY = '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';
+        
+        async function testGroqAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">Testing Groq API key...</div>';
+            
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${GROQ_API_KEY}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.1-8b-instant',
+                        messages: [
+                            {
+                                role: 'user',
+                                content: 'Hello! Please respond with just "Groq API is working correctly"'
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 100,
+                    }),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const text = result?.choices?.[0]?.message?.content;
+                    resultDiv.innerHTML = `<div class="success">✅ Groq API Working! Response: ${text}</div>`;
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `<div class="error">❌ Groq API Error: ${errorData.error?.message || response.statusText}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-run test
+        window.onload = function() {
+            testGroqAPI();
+        };
+    </script>
+</body>
+</html>

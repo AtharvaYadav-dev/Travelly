@@ -52,38 +52,49 @@ const TravelChatbot = ({ itinerary, onClose }) => {
       }
 
       // Build context from itinerary
-      const context = `You are a helpful travel assistant. Here's the trip context:
+      const context = `You are an expert Indian travel assistant with deep knowledge of ${itinerary?.location}. Here's the complete trip context:
 
 Destination: ${itinerary?.location}
 Duration: ${calculateDays(itinerary?.startDate, itinerary?.endDate)} days
-Budget: $${itinerary?.budget}
+Budget: ₹${itinerary?.budget} INR
 Travelers: ${itinerary?.participants} people
 Trip Type: ${itinerary?.type}
 Dates: ${itinerary?.startDate} to ${itinerary?.endDate}
 
-Provide helpful, concise, and practical travel advice. Be friendly and conversational.
+Provide detailed, practical, and insider travel advice. Include:
+- Specific recommendations with names of places, restaurants, shops
+- Local tips and cultural insights
+- Budget-friendly alternatives
+- Transportation options and costs
+- Safety advice specific to the destination
+- Local food recommendations with price ranges
+- Hidden gems and offbeat places
+- Best times to visit attractions
+- Local customs and etiquette
+
+Be friendly, conversational, and use some Hinglish phrases. Give actionable advice with specific details.
 
 User question: ${question}`;
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${API_KEY}`,
+        `https://api.groq.com/openai/v1/chat/completions`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: context }] }],
-            generationConfig: {
-              temperature: 0.7,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 1024,
-            },
+            model: 'llama-3.1-8b-instant',
+            messages: [{ role: 'user', content: context }],
+            temperature: 0.7,
+            max_tokens: 2048,
           }),
         }
       );
 
       const result = await response.json();
-      const aiResponse = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const aiResponse = result.choices[0].message.content;
 
       if (!aiResponse) {
         throw new Error('No response from AI');

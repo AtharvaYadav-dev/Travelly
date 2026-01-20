@@ -120,72 +120,140 @@ const Result = () => {
     const end = new Date(data.endDate);
     const totalDays = Math.min(7, Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1);
 
-    // Enhanced prompt for better AI responses
-    const prompt = `You are an expert travel planner specializing in ${data.location}. Create a detailed ${totalDays}-day itinerary.
+    // Enhanced prompt for better AI responses with Indian context
+    const prompt = `Create a detailed ${totalDays}-day itinerary for ${data.location}.
 
-**Trip Details:**
+Trip Details:
 - Title: ${data.title}
 - Location: ${data.location}
-- Travelers: ${data.participants} people
-- Budget: $${data.budget} USD
+- Travelers: ${data.participants} log
+- Budget: ₹${data.budget} INR
 - Trip Type: ${data.type}
 - Dates: ${data.startDate} to ${data.endDate}
 
-**Instructions:**
-1. Create exactly ${totalDays} days of activities
-2. For each day, provide 4-6 time-specific activities
-3. Format each activity as: "[HH:MM AM/PM] Activity Name: Detailed description (Est: $XX)"
-4. Include breakfast, lunch, dinner, and attractions
-5. Stay within the total budget of $${data.budget}
-6. Match the ${data.type} theme
-7. End with a "Cost Summary:" section breaking down major expenses
+Requirements:
+- Exactly ${totalDays} days with 6-8 detailed activities per day
+- Format: [HH:MM AM/PM] Activity Name: Detailed description with specific location, what to expect, travel time, and exact cost (Est: ₹XX)
+- Include breakfast, lunch, dinner, local attractions, shopping, and unique experiences
+- Add travel tips, local food recommendations, and cultural insights
+- Include transportation suggestions between locations
+- Stay within ₹${data.budget} total budget
+- Match ${data.type} theme perfectly
+- End with comprehensive "Cost Summary:" section breaking down all expenses
+- Use authentic Indian context, local names, and practical details
 
-**Format Example:**
+Example:
 Day 1
-[08:00 AM] Breakfast at Local Café: Start your day with traditional cuisine (Est: $15)
-[10:00 AM] Visit Historic Site: Explore the main attraction (Est: $30)
+[08:00 AM] Breakfast at Saravana Bhavan: Famous South Indian restaurant near MG Road, try idli and filter coffee (Est: ₹200)
+[09:30 AM] Visit Bangalore Palace: 30-min auto ride, explore royal architecture and gardens (Est: ₹500)
+[11:30 AM] Shopping at Commercial Street: Local market for clothes and souvenirs, bargain hard (Est: ₹1,500)
+[01:00 PM] Lunch at Shiv Sagar: Authentic Karnataka thali, unlimited servings (Est: ₹300)
+[03:00 PM] Cubbon Park Walk: Relax in green space, see Vidhana Soudha from outside (Free)
+[05:00 PM] ISKCON Temple Visit: Beautiful temple architecture, attend evening aarti (Est: ₹100)
+[07:00 PM] Dinner at Chai Point: Local cafe with chai and snacks (Est: ₹250)
+[09:00 PM] Brigade Road Nightlife: Walk around, window shopping (Free)
 
-Please generate the itinerary now:`;
+Generate comprehensive itinerary now with maximum details:`;
 
+    // Try multiple Groq models in order of preference
+    const models = [
+      'llama-3.1-8b-instant',
+      'llama-3.1-70b-versatile',
+      'mixtral-8x7b-32768'
+    ];
+
+    for (const model of models) {
+      try {
+        console.log(`🔄 Trying Groq model: ${model}`);
+        await tryGenerateWithGroqModel(data, prompt, model, totalDays);
+        return; // Success, exit loop
+      } catch (error) {
+        console.error(`❌ Model ${model} failed:`, error.message);
+        if (model === models[models.length - 1]) {
+          // All models failed
+          setNotification({ type: 'error', message: `❌ Failed to generate itinerary: ${error.message}` });
+          setLoading(false);
+          throw error;
+        }
+        continue; // Try next model
+      }
+    }
+  };
+
+  const tryGenerateWithGroqModel = async (data, prompt, model, totalDays) => {
     try {
       setLoading(true);
-      const key = import.meta.env.VITE_GEMINI_API_KEY;
+      const key = import.meta.env.VITE_GROQ_API_KEY;
 
-      if (!key || key === 'your_gemini_api_key_here') {
-        throw new Error('⚠️ Gemini API Key not configured. Please add your API key to the .env file. Get one at: https://makersuite.google.com/app/apikey');
+      console.log('🔑 Groq API Key Check:', key ? 'Present' : 'Missing');
+      console.log('🔑 API Key Length:', key?.length);
+      console.log('🔑 API Key Prefix:', key?.substring(0, 10) + '...');
+
+      if (!key || key === 'your_groq_api_key_here') {
+        throw new Error('⚠️ Groq API Key not configured. Please add your API key to .env file. Get one at: https://console.groq.com/keys');
       }
 
-      setNotification({ type: 'info', message: '🤖 AI is crafting your perfect itinerary...' });
+      setNotification({ type: 'info', message: `🤖 AI is crafting your perfect itinerary using ${model}...` });
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`, {
+      const apiUrl = `https://api.groq.com/openai/v1/chat/completions`;
+      console.log('🌐 API URL:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 8192,
-          }
+          model: model,
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 6144,
         }),
+        signal: AbortSignal.timeout(60000) // 60 second timeout
       });
+
+      console.log('📡 Response Status:', response.status);
+      console.log('📡 Response Headers:', response.headers);
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+        console.error('❌ API Error Response:', errorData);
+        throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
       }
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error('❌ JSON Parse Error:', parseError);
+        throw new Error('Failed to parse API response');
+      }
+      console.log('✅ API Success Response:', result);
 
       if (result.error) {
-        throw new Error(`Gemini API Error: ${result.error.message}`);
+        console.error('❌ API Error in Result:', result.error);
+        throw new Error(`Groq API Error: ${result.error.message}`);
       }
 
-      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const text = result?.choices?.[0]?.message?.content;
+      console.log('📝 Generated Text Length:', text?.length || 0);
+      console.log('📝 Generated Text:', text?.substring(0, 300) + '...');
 
       if (!text) {
         throw new Error('No response generated. Please try again.');
+      }
+
+      // Check if response is complete (has proper ending)
+      const hasProperEnding = text.includes('Cost Summary:') || text.includes('Total Cost:') || text.includes('Budget:');
+      if (!hasProperEnding) {
+        console.warn('⚠️ Response appears incomplete, missing cost summary');
+        throw new Error('Response incomplete. Retrying with different model...');
       }
 
       setAiResponse(text);
@@ -198,6 +266,7 @@ Please generate the itinerary now:`;
       setFormattedResponse(days);
       setCostSummary(costSummary);
       setNotification({ type: 'success', message: `✨ Your ${totalDays}-day itinerary is ready!` });
+      setLoading(false); // Add this to stop loading
 
       // Save to database if configured
       if (data.id && isSupabaseConfigured) {
@@ -205,19 +274,9 @@ Please generate the itinerary now:`;
       }
     } catch (err) {
       console.error('AI Generation Error:', err);
-      setNotification({
-        type: 'error',
-        message: err.message || 'Failed to generate itinerary. Please check your API key and try again.'
-      });
-
-      // Set fallback content
-      setFormattedResponse([{
-        title: 'Error',
-        items: ['Unable to generate itinerary. Please check your internet connection and API key configuration.'],
-        image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200"
-      }]);
+      throw err; // Re-throw to be caught by outer loop
     } finally {
-      setLoading(false);
+      setLoading(false); // Ensure loading is always turned off
     }
   };
 
@@ -248,9 +307,9 @@ Please generate the itinerary now:`;
             transition={{ delay: 0.5 }}
             className="mb-12"
           >
-            <span className="text-primary font-black uppercase tracking-[1em] text-[10px] mb-8 block">AI GENERATED ITINERARY</span>
+            <span className="text-primary font-black uppercase tracking-[1em] text-[10px] mb-8 block">AI NE BANAYA ITINERARY</span>
             <h1 className="text-7xl md:text-[10rem] font-black uppercase italic tracking-tighter leading-none mb-12">
-              {savedData?.title || 'Your Trip'}
+              {savedData?.title || 'Tumhara Trip'}
             </h1>
           </motion.div>
 
@@ -261,9 +320,9 @@ Please generate the itinerary now:`;
             className="flex flex-wrap justify-center gap-16 md:gap-32 text-white/50 font-bold uppercase tracking-[0.3em] text-[11px]"
           >
             {[
-              { label: 'Region', val: savedData?.location || 'Alps' },
-              { label: 'Allocated', val: `$${savedData?.budget || '0'}` },
-              { label: 'Travelers', val: `${savedData?.participants || '1'} People` }
+              { label: 'Location', val: savedData?.location || 'India' },
+              { label: 'Budget', val: `₹${savedData?.budget || '0'}` },
+              { label: 'Log Ja Rahe', val: `${savedData?.participants || '1'} Log` }
             ].map((item, i) => (
               <div key={i} className="flex flex-col items-center gap-4">
                 <span className="text-primary/60">{item.label}</span>
@@ -278,17 +337,17 @@ Please generate the itinerary now:`;
       <div className="sticky top-20 z-50 w-full backdrop-blur-3xl bg-slate-950/20 py-8 border-y border-white/5">
         <div className="max-w-[1600px] mx-auto px-10 flex flex-wrap justify-between items-center gap-8">
           <button onClick={() => navigate('/planner')} className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 hover:text-white transition-all flex items-center gap-4 group">
-            <span className="text-xl group-hover:-translate-x-2 transition-transform">←</span> Back to Planner
+            <span className="text-xl group-hover:-translate-x-2 transition-transform">←</span> Planner pe Wapas
           </button>
           <div className="flex flex-wrap gap-4">
             <Magnetic>
               <button onClick={handleCopyPlan} className="btn-expensive bg-primary border-none shadow-primary-glow px-8 text-sm">
-                Copy Plan
+                Plan Copy Karo
               </button>
             </Magnetic>
             <Magnetic>
               <button onClick={() => savedData && generateAI(savedData)} disabled={loading} className="btn-expensive bg-white/5 px-8 text-sm">
-                {loading ? 'Regenerating...' : 'Regenerate'}
+                {loading ? 'Bana raha hai...' : 'Dobara Banao'}
               </button>
             </Magnetic>
             <Magnetic>
@@ -303,7 +362,7 @@ Please generate the itinerary now:`;
             </Magnetic>
             <Magnetic>
               <button onClick={() => setShowPackingList(true)} className="btn-expensive bg-white/5 px-8 text-sm">
-                🎒 Packing
+                🎒 Packing List
               </button>
             </Magnetic>
             <Magnetic>
@@ -338,7 +397,7 @@ Please generate the itinerary now:`;
 
       <div className="max-w-[1600px] mx-auto px-10 py-32">
         {loading ? (
-          <Loader message="Creating your itinerary..." />
+          <Loader message="Itinerary ban raha hai bhai..." />
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-32">
 
