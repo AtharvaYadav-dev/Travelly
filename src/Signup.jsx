@@ -18,7 +18,7 @@ const Signup = () => {
     setErrorMsg('');
 
     if (!fullName || !phone || !email || !password) {
-      setErrorMsg('All sectors must be populated.');
+      setErrorMsg('Bhai, saare fields toh bhar na re!');
       setLoading(false);
       return;
     }
@@ -38,7 +38,7 @@ const Signup = () => {
       setErrorMsg(error.message);
       setLoading(false);
     } else {
-      alert('Registration Protocol Complete. Proceed to login.');
+      alert('Signup ho gaya bhai! Ab login karlo.');
       navigate('/login');
     }
   };
@@ -62,8 +62,8 @@ const Signup = () => {
               </div>
             </div>
           </Link>
-          <h2 className="text-5xl font-black tracking-tighter mb-4 italic text-white">Begin Your <span className="text-primary">Odyssey</span></h2>
-          <p className="text-white/40 font-medium tracking-tight">Register your credentials to access world-class AI travel architecture.</p>
+          <h2 className="text-5xl font-black tracking-tighter mb-4 italic text-white">Shuru Karo Apni <span className="text-primary">Journey</span></h2>
+          <p className="text-white/40 font-medium tracking-tight">AI travel planner ke saath duniya ghoomne ke liye signup karo!</p>
         </div>
 
         {errorMsg && (
@@ -78,10 +78,10 @@ const Signup = () => {
 
         <form onSubmit={handleSignup} className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Full Identity</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Poora Naam</label>
             <input
               type="text"
-              placeholder="Commander Doe"
+              placeholder="Rahul Kumar"
               className="premium-input"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -90,10 +90,10 @@ const Signup = () => {
           </div>
 
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Comm Link (Phone)</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Mobile Number</label>
             <input
               type="text"
-              placeholder="+91 00000 00000"
+              placeholder="+91 98765 43210"
               className="premium-input"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -102,10 +102,10 @@ const Signup = () => {
           </div>
 
           <div className="space-y-3 col-span-2">
-            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Archive ID (Email)</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Email ID</label>
             <input
               type="email"
-              placeholder="you@travelly.com"
+              placeholder="tumhara@email.com"
               className="premium-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -114,7 +114,7 @@ const Signup = () => {
           </div>
 
           <div className="space-y-3 col-span-2">
-            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Security Key</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Password</label>
             <input
               type="password"
               placeholder="••••••••"
@@ -133,17 +133,17 @@ const Signup = () => {
             {loading ? (
               <div className="flex items-center justify-center gap-3">
                 <span className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Processing...</span>
+                <span>Signup kar raha hai...</span>
               </div>
             ) : (
-              'Initialize Deployment 🔱'
+              'Account Banayo 🔱'
             )}
           </button>
         </form>
 
         <p className="mt-12 text-center text-white/40 font-bold text-sm tracking-tight">
-          Already archived?{' '}
-          <Link to="/login" className="text-primary hover:text-orange-600 transition-colors">Sign In</Link>
+          Pehle se account hai?{' '}
+          <Link to="/login" className="text-primary hover:text-orange-600 transition-colors">Login Karo</Link>
         </p>
       </motion.div>
     </div>

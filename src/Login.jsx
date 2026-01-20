@@ -46,8 +46,8 @@ const Login = () => {
               </div>
             </div>
           </Link>
-          <h2 className="text-4xl font-black tracking-tighter mb-4 italic text-white">Welcome <span className="text-primary">Back</span></h2>
-          <p className="text-white/40 font-medium">Continue your journey to the unexplored.</p>
+          <h2 className="text-4xl font-black tracking-tighter mb-4 italic text-white">Welcome <span className="text-primary">Back Bhai</span></h2>
+          <p className="text-white/40 font-medium">Apna trip shuru karne ke liye login karle!</p>
         </div>
 
         {errorMsg && (
@@ -62,10 +62,10 @@ const Login = () => {
 
         <form onSubmit={handleLogin} className="space-y-8">
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Archive ID (Email)</label>
+            <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30 ml-1">Email ID</label>
             <input
               type="email"
-              placeholder="you@travelly.com"
+              placeholder="tumhara@email.com"
               className="premium-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -75,8 +75,8 @@ const Login = () => {
 
           <div className="space-y-3">
             <div className="flex justify-between items-center ml-1">
-              <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30">Security Key</label>
-              <a href="#" className="text-xs font-bold uppercase tracking-widest text-primary hover:text-orange-600 transition-colors">Recover?</a>
+              <label className="text-xs font-bold uppercase tracking-[0.2em] text-white/30">Password</label>
+              <a href="#" className="text-xs font-bold uppercase tracking-widest text-primary hover:text-orange-600 transition-colors">Bhool gaya?</a>
             </div>
             <input
               type="password"
@@ -96,17 +96,17 @@ const Login = () => {
             {loading ? (
               <div className="flex items-center justify-center gap-3">
                 <span className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Syncing...</span>
+                <span>Login kar raha hai...</span>
               </div>
             ) : (
-              'Enter Archive 🚀'
+              'Login Karo 🚀'
             )}
           </button>
         </form>
 
         <p className="mt-12 text-center text-white/40 font-bold text-sm tracking-tight">
-          First deployment?{' '}
-          <Link to="/signup" className="text-primary hover:text-orange-600 transition-colors">Register Dossier</Link>
+          Naya account banana hai?{' '}
+          <Link to="/signup" className="text-primary hover:text-orange-600 transition-colors">Signup Karo</Link>
         </p>
       </motion.div>
     </div>
