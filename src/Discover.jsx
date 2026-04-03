@@ -46,9 +46,9 @@ const Discover = () => {
   const destinations = [
     { title: "Manali", location: "Himachal", price: "₹15,999", type: "Adventure", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200", tag: "Lit AF" },
     { title: "Goa", location: "Konkan Coast", price: "₹12,999", type: "Beach Party", img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200", tag: "Vibes" },
-    { title: "Rishikesh", location: "Uttarakhand", price: "₹8,999", type: "Spiritual", img: "https://images.unsplash.com/photo-1594701040374-9929cdaf453c?q=80&w=1200", tag: "Peace" },
+    { title: "Rishikesh", location: "Uttarakhand", price: "₹8,999", type: "Spiritual", img: "https://images.unsplash.com/photo-1517670829317-14227926955a?q=80&w=1200", tag: "Peace" },
     { title: "Kerala", location: "God's Own Country", price: "₹18,999", type: "Backwaters", img: "https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=1200", tag: "Nature" },
-    { title: "Rajasthan", location: "Royal State", price: "₹15,999", type: "Heritage", img: "https://images.unsplash.com/photo-1524492442961-5688c919d4a8?q=80&w=1200", tag: "Royal" },
+    { title: "Rajasthan", location: "Royal State", price: "₹15,999", type: "Heritage", img: "https://images.unsplash.com/photo-1599661046289-e31887846eac?q=80&w=1200", tag: "Royal" },
     { title: "Andaman", location: "Island Paradise", price: "₹25,999", type: "Scuba", img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=1200", tag: "Goals" }
   ];
 

@@ -2,16 +2,63 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Magnetic from "./Magnetic";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGhostCursor } from "./hooks/useGhostCursor";
+import { ANTIGRAVITY_FLOAT } from "./utils/gsapConfigs";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HeroNew = () => {
   const navigate = useNavigate();
   const { scrollY } = useScroll();
   const containerRef = useRef(null);
+  const heroRef = useRef(null);
 
   // Parallax effects
   const yParallax = useTransform(scrollY, [0, 1000], [0, 300]);
-  const opacityHero = useTransform(scrollY, [0, 400], [1, 0]);
+  const opacityHero = useTransform(scrollY, [0, 600], [1, 1]);
   const scaleHero = useTransform(scrollY, [0, 600], [1, 1.2]);
+
+  // GSAP Cinematic Animations (Classic Sovereign Edition)
+  useEffect(() => {
+    let ctx = gsap.context(() => {
+      // 1. Cinematic Text Reveal on load
+      gsap.fromTo(".hero-reveal",
+        { y: 150, opacity: 0, rotateX: 45, transformOrigin: "0% 50% -50" },
+        { 
+          y: 0, 
+          opacity: 1, 
+          rotateX: 0,
+          duration: 1.8, 
+          stagger: 0.15, 
+          ease: "power4.out",
+          delay: 0.2
+        }
+      );
+
+      // 2. Destagger destinations on scroll
+      gsap.fromTo(".dest-card", 
+        { y: 50, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          stagger: 0.1,
+          ease: "back.out(1.7)",
+          scrollTrigger: {
+            trigger: ".dest-container",
+            start: "top 80%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // 3. Antigravity Float Effect
+      gsap.to(".dest-card", ANTIGRAVITY_FLOAT);
+    }, containerRef);
+    
+    return () => ctx.revert();
+  }, []);
 
   // Statistics
   const stats = [
@@ -40,7 +87,7 @@ const HeroNew = () => {
     {
       title: "Rajasthan",
       subtitle: "Royal Swag",
-      image: "https://images.unsplash.com/photo-1524492442961-5688c919d4a8?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1593693397365-c8b51c4e8711?w=800&q=80",
       description: "Palaces, forts & desi ghee ka khana",
       price: "From ₹15,999"
     },
@@ -54,7 +101,7 @@ const HeroNew = () => {
     {
       title: "Rishikesh",
       subtitle: "Spiritual Trip",
-      image: "https://images.unsplash.com/photo-1594701040374-9929cdaf453c?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1605649487212-4d4ce7ca66aa?w=800&q=80",
       description: "Ganga arti, camping & adventure sports",
       price: "From ₹8,999"
     },
@@ -66,6 +113,22 @@ const HeroNew = () => {
       price: "From ₹25,999"
     }
   ];
+
+  // 🎯 Predictive REFs for Ghost Cursor
+  const destRefs = useRef([]);
+
+  // 👻 Ghost Cursor Prediction Handler
+  const handlePrediction = (destTitle) => {
+    console.log(`🚀 Pre-warming engine for: ${destTitle}`);
+    localStorage.setItem('prefetchedDest', destTitle);
+  };
+
+  const targets = destinations.map((d, i) => ({
+    id: d.title,
+    ref: { current: destRefs.current[i] }
+  }));
+
+  useGhostCursor(targets, handlePrediction);
 
   // Travel experiences with Indian context
   const experiences = [
@@ -130,7 +193,7 @@ const HeroNew = () => {
     <div className="w-full bg-[var(--bg-primary)] overflow-x-hidden" ref={containerRef}>
 
       {/* 🎬 HERO SECTION WITH VIDEO BACKGROUND */}
-      <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden">
+      <section ref={heroRef} className="relative h-screen flex flex-col items-center justify-center overflow-hidden">
         {/* Video Background */}
         <motion.div
           style={{ y: yParallax, opacity: opacityHero, scale: scaleHero }}
@@ -151,36 +214,27 @@ const HeroNew = () => {
         {/* Hero Content */}
         <div className="relative z-20 text-center px-4 md:px-6 max-w-6xl">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-6"
+            className="mb-6 hero-reveal"
           >
             <span className="inline-block px-6 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white text-sm font-bold uppercase tracking-wider">
               ✨ AI Se Trip Planning - Desi Style!
             </span>
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-white leading-none tracking-tighter uppercase mb-6"
+          <h1
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-white leading-none tracking-tighter uppercase mb-6 hero-reveal"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
             Ghumne Chale?
             <br />
             <span className="gradient-text-sunset">Bhai!</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.6 }}
-            className="text-lg md:text-xl lg:text-2xl text-white/80 font-medium max-w-3xl mx-auto mb-12 leading-relaxed"
+          <p
+            className="text-lg md:text-xl lg:text-2xl text-white/80 font-medium max-w-3xl mx-auto mb-12 leading-relaxed hero-reveal"
           >
             Desi destinations, personalized itineraries, and unforgettable trips with our AI travel companion. Ab pakad lo backpack!
-          </motion.p>
+          </p>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -218,7 +272,7 @@ const HeroNew = () => {
       </section>
 
       {/* 📊 STATISTICS SECTION */}
-      <section className="py-20 md:py-32 px-4 md:px-6 bg-[var(--bg-surface)]">
+      <section className="py-12 md:py-20 px-4 md:px-6 bg-[var(--bg-surface)]">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
             {stats.map((stat, i) => (
@@ -243,7 +297,7 @@ const HeroNew = () => {
       </section>
 
       {/* 🌍 FEATURED DESTINATIONS */}
-      <section className="py-20 md:py-32 px-4 md:px-6">
+      <section className="py-16 md:py-24 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 1, y: 0 }}
@@ -265,17 +319,28 @@ const HeroNew = () => {
             </p>
           </motion.div>
 
-          {/* Horizontal scroll on mobile, grid on desktop */}
-          <div className="overflow-x-auto md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0">
-            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pb-4 md:pb-0">
+          {/* Classic Grid Layout for Destinations */}
+          <div className="dest-container overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
               {destinations.map((dest, i) => (
-                <motion.div
+                <div
                   key={i}
-                  initial={{ opacity: 1, x: 0 }}
-                  whileInView={{ opacity: 1, x: 0, rotateY: [0, 5, 0] }}
-                  viewport={{ once: false, amount: 0.2 }}
-                  transition={{ delay: i * 0.1, duration: 0.6 }}
-                  className="group card-premium cursor-pointer flex-shrink-0 w-[85vw] md:w-auto"
+                  ref={(el) => {
+                    destRefs.current[i] = el;
+                  }}
+                  className="dest-card group card-premium cursor-pointer"
+                  onClick={() => {
+                    localStorage.setItem('currentItinerary', JSON.stringify({
+                      title: dest.title,
+                      location: dest.title,
+                      budget: 150000,
+                      participants: 2,
+                      type: dest.subtitle.toLowerCase(),
+                      startDate: new Date().toISOString().split('T')[0],
+                      endDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0]
+                    }));
+                    navigate('/result');
+                  }}
                 >
                   <div className="relative h-64 md:h-80 overflow-hidden rounded-xl mb-6">
                     <img
@@ -299,7 +364,7 @@ const HeroNew = () => {
                   <p className="text-[var(--text-secondary)] leading-relaxed">
                     {dest.description}
                   </p>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -324,7 +389,7 @@ const HeroNew = () => {
       </section>
 
       {/* 🎯 EXPERIENCES SECTION */}
-      <section className="py-20 md:py-32 px-4 md:px-6 bg-[var(--bg-surface)]">
+      <section className="py-16 md:py-24 px-4 md:px-6 bg-[var(--bg-surface)]">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 1, y: 0 }}
@@ -369,7 +434,7 @@ const HeroNew = () => {
       </section>
 
       {/* 💬 TESTIMONIALS */}
-      <section className="py-20 md:py-32 px-4 md:px-6">
+      <section className="py-16 md:py-24 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 1, y: 0 }}

@@ -8,6 +8,7 @@ import Navbar from './Navbar';
 import CustomCursor from './CustomCursor';
 import LuxuryMesh from './LuxuryMesh';
 import VoiceCommands from './components/VoiceCommands';
+import GlobalErrorBoundary from './components/ErrorBoundary';
 
 const App = () => {
   const navigate = useNavigate();
@@ -42,7 +43,9 @@ const App = () => {
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             className="w-full"
           >
-            {location.pathname === "/" ? <HeroNew /> : <div className="max-w-[1600px] mx-auto min-h-screen px-6 py-12"><Outlet /></div>}
+            <GlobalErrorBoundary>
+              {location.pathname === "/" ? <HeroNew /> : <div className="max-w-[1600px] mx-auto min-h-screen px-6 py-12"><Outlet /></div>}
+            </GlobalErrorBoundary>
           </motion.div>
         </AnimatePresence>
       </main>

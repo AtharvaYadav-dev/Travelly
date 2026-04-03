@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useActionState } from 'react';
+import { useBhaiLogic } from './hooks/useBhaiLogic';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './supabase';
@@ -60,7 +61,126 @@ const Planner = () => {
     range: ''
   });
   const [notification, setNotification] = useState({ type: '', message: '' });
-  const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isParsingVoice, setIsParsingVoice] = useState(false);
+  const { translate } = useBhaiLogic(true);
+
+  // 🚀 React 19: useActionState for Form Handling
+  const [state, formAction, isPending] = useActionState(async (prevState, formData) => {
+    const title = formData.get('title');
+    const location = formData.get('location');
+    const budget = formData.get('budget');
+    const participants = formData.get('participants');
+    const type = formData.get('type');
+    const startDate = formData.get('startDate');
+    const endDate = formData.get('endDate');
+
+    if (!title || !location || !budget || !participants || !type || !startDate || !endDate) {
+      return { error: 'Bhai saare details bhari na!' };
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { error: 'Pehle login karle bhai!' };
+
+      const { data, error } = await supabase
+        .from('itineraries')
+        .insert([{
+          title: title.trim(),
+          type: type.trim(),
+          budget: parseInt(budget),
+          participants: parseInt(participants),
+          startDate,
+          endDate,
+          location: location.trim(),
+          user_id: user.id,
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      localStorage.setItem('currentItinerary', JSON.stringify(data));
+      setTimeout(() => navigate('/result'), 2000);
+      return { success: true };
+    } catch (err) {
+      return { error: err.message };
+    }
+  }, null);
+
+  const parseVoiceWithAI = async (transcript) => {
+    setIsParsingVoice(true);
+    setNotification({ type: 'info', message: '🤖 AI is filling your form based on what you said...' });
+    try {
+      const key = import.meta.env.VITE_GROQ_API_KEY;
+      if (!key) throw new Error("API key missing.");
+      
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{
+            role: 'system',
+            content: `You are an AI that extracts travel data from raw text. Extract to ONLY valid JSON containing EXACTLY these keys: { title: string, location: string, budget: number, participants: number, type: string (must be one of: 'Adventure Trip', 'Beach Vibe', 'Historic Ghumo', 'Luxury Trip', 'Scenic Beauty', 'Pilgrimage', 'Food Tour'), startDate: "YYYY-MM-DD", endDate: "YYYY-MM-DD" }. Leave missing fields empty string or null. Date must be YYYY-MM-DD. ONLY OUTPUT JSON.`
+          }, {
+            role: 'user',
+            content: transcript
+          }],
+          response_format: { type: "json_object" }
+        })
+      });
+
+      const data = await response.json();
+      const parsed = JSON.parse(data.choices[0].message.content);
+      
+      setForm(prev => ({
+        ...prev,
+        title: parsed.title || prev.title,
+        location: parsed.location || prev.location,
+        budget: parsed.budget || prev.budget,
+        participants: parsed.participants || prev.participants,
+        type: parsed.type || prev.type,
+        startDate: parsed.startDate || prev.startDate,
+        endDate: parsed.endDate || prev.endDate,
+      }));
+      setNotification({ type: 'success', message: '✨ Form auto-filled by AI! Just review and click submit.' });
+    } catch (err) {
+      console.error(err);
+      setNotification({ type: 'error', message: 'Voice parsing failed. Try typing instead.' });
+    } finally {
+      setIsParsingVoice(false);
+    }
+  };
+
+  const startVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setNotification({ type: 'error', message: 'Browser does not support voice input.' });
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN'; // Indian English supports Hindi mix well
+    recognition.start();
+    setIsListening(true);
+    setNotification({ type: 'info', message: '🎤 Listening... Tell me your trip details! ("I want to go to Goa for 5 days with 3 friends under 40000 budget")' });
+
+    recognition.onresult = (event) => {
+      const current = event.resultIndex;
+      const transcript = event.results[current][0].transcript;
+      setIsListening(false);
+      parseVoiceWithAI(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      setIsListening(false);
+      setNotification({ type: 'error', message: 'Mic error: ' + event.error });
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -145,8 +265,8 @@ const Planner = () => {
   return (
     <div className="min-h-screen pb-48" style={{ background: 'var(--bg-primary)' }}>
       <Notification
-        type={notification.type}
-        message={notification.message}
+        type={state?.error ? 'error' : state?.success ? 'success' : notification.type}
+        message={state?.error || (state?.success ? translate('Success') : notification.message)}
         onClose={() => setNotification({ type: '', message: '' })}
       />
 
@@ -169,12 +289,33 @@ const Planner = () => {
                   <span className="text-primary">Trip Plan</span> <br /> <span className="primary-gradient-text">Karo Bhai!</span>
                 </h2>
               </motion.div>
-              <p className="text-base md:text-lg lg:text-2xl font-medium max-w-3xl italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                Apna next trip plan karo India mein! Bata preferences aur hum banayenge personalized itinerary for you.
-              </p>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8 mt-10">
+                <p className="text-base md:text-lg lg:text-2xl font-medium max-w-3xl italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  Apna next trip plan karo India mein! Bata preferences aur hum banayenge personalized itinerary for you.
+                </p>
+
+                {/* 🎤 VOICE TO TRIP BUTTON */}
+                <Magnetic>
+                  <button 
+                    type="button" 
+                    onClick={startVoiceInput}
+                    disabled={isListening || isParsingVoice}
+                    className={`shrink-0 flex items-center justify-center gap-3 px-6 py-4 rounded-full border-2 transition-all duration-300 shadow-2xl ${
+                      isListening ? 'border-red-500 bg-red-500/20 text-red-500 animate-pulse' : 
+                      isParsingVoice ? 'border-primary/50 bg-primary/20 text-primary animate-pulse' : 
+                      'border-primary bg-primary/10 text-primary hover:bg-primary hover:text-white shadow-primary-glow'
+                    }`}
+                  >
+                    <span className="text-2xl">{isListening ? '🎙️' : '🎤'}</span>
+                    <span className="font-black italic uppercase tracking-wider text-sm">
+                      {isListening ? 'Bol Bhai...' : isParsingVoice ? 'AI Samajh Raha Hai...' : 'Voice Se Autofill'}
+                    </span>
+                  </button>
+                </Magnetic>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-12 md:space-y-16 lg:space-y-24">
+            <form action={formAction} className="space-y-12 md:space-y-16 lg:space-y-24">
               {/* PHASE 01 */}
               <div className="space-y-6 md:space-y-12">
                 <div className="flex items-center gap-3 md:gap-6">
@@ -223,10 +364,10 @@ const Planner = () => {
                 <Magnetic>
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={isPending}
                     className="w-full btn-expensive bg-primary hover:bg-orange-600 border-none text-white text-sm md:text-base py-5 md:py-8 shadow-primary-glow"
                   >
-                    {loading ? "Itinerary bana raha hai..." : "Mera Trip Banao"}
+                    {isPending ? translate('Loading') : translate('Create')}
                   </button>
                 </Magnetic>
               </div>

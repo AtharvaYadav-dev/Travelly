@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useOptimistic } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, UserPlus, Mail, Check, Trash2, Crown, Users, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { supabase } from '../supabase';
@@ -11,6 +11,19 @@ const CollaborationModal = ({ tripId, tripData, currentUser, onClose }) => {
   const [newComment, setNewComment] = useState('');
   const [votes, setVotes] = useState({});
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [kineticPin, setKineticPin] = useState({ x: 0, y: 0 }); // Kinetic Tie-breaker state
+
+  // 🚀 React 19: useOptimistic for instant pin placement
+  const [optimisticPins, addOptimisticPin] = useOptimistic(
+    onlineUsers,
+    (state, newPin) => {
+      const existing = state.find(u => u.user_id === newPin.user_id);
+      if (existing) {
+        return state.map(u => u.user_id === newPin.user_id ? { ...u, cursor_pos: newPin.cursor_pos } : u);
+      }
+      return [...state, newPin];
+    }
+  );
 
   useEffect(() => {
     loadCollaborators();
@@ -33,20 +46,61 @@ const CollaborationModal = ({ tripId, tripData, currentUser, onClose }) => {
       )
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
-        setOnlineUsers(Object.values(state).flat());
+        const users = Object.values(state).flat();
+        setOnlineUsers(users);
+
+        // 🧠 Kinetic Tie-breaker: Calculate weighted average if multiple users are moving
+        if (users.length > 1) {
+          const positions = users
+            .filter(u => u.cursor_pos)
+            .map(u => u.cursor_pos);
+          
+          if (positions.length > 0) {
+            const avgX = positions.reduce((s, p) => s + p.x, 0) / positions.length;
+            const avgY = positions.reduce((s, p) => s + p.y, 0) / positions.length;
+            
+            // Settlement with smooth motion
+            setKineticPin({ x: avgX, y: avgY });
+            console.log('⚖️ Kinetic Settlement Applied:', { x: avgX, y: avgY });
+          }
+        }
       })
       .subscribe();
 
-    // Track own presence
+    // Track own presence with a simulated cursor position for demo
     channel.track({
       user_id: currentUser.id,
       email: currentUser.email,
-      online_at: new Date().toISOString()
+      online_at: new Date().toISOString(),
+      cursor_pos: { x: Math.random() * 500, y: Math.random() * 500 } // This would be the real map pin coordinate
     });
 
     return () => {
       channel.unsubscribe();
     };
+  };
+
+  const handleMapClick = async (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const newPos = { x, y };
+
+    // 1. Update Optimistically
+    addOptimisticPin({
+      user_id: currentUser.id,
+      cursor_pos: newPos
+    });
+
+    // 2. Broadcast to others
+    const channel = supabase.channel(`trip:${tripId}`);
+    await channel.track({
+      user_id: currentUser.id,
+      email: currentUser.email,
+      online_at: new Date().toISOString(),
+      cursor_pos: newPos
+    });
   };
 
   const loadCollaborators = async () => {

@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle } from 'react-leaflet';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useOptimistic, useTransition } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { supabase } from '../supabase';
 
 // Fix for default marker icons in React-Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -49,6 +51,78 @@ const TripMap = ({ itinerary, formattedResponse }) => {
   const [zoom, setZoom] = useState(11);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // 🚀 React 19: useOptimistic for Zero-Lag Pin Drops
+  const [optimisticLocations, addOptimisticLocation] = useOptimistic(
+    locations,
+    (state, { index, position }) => {
+      const updated = [...state];
+      if (updated[index]) {
+        updated[index] = { ...updated[index], position };
+      }
+      return updated;
+    }
+  );
+
+  const [isPending, startTransition] = useTransition();
+
+  // Realtime Multiplayer Channel
+  const channelRef = useRef(null);
+
+  useEffect(() => {
+    if (!itinerary?.id) return;
+
+    // Join Multiplayer Room
+    const channel = supabase.channel(`map_room_${itinerary.id}`);
+    
+    channel.on('broadcast', { event: 'marker_move' }, (payload) => {
+      const { index, position } = payload.payload;
+      setLocations(prev => {
+        const updated = [...prev];
+        if (updated[index]) {
+          updated[index] = { ...updated[index], position };
+        }
+        return updated;
+      });
+    }).subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [itinerary]);
+
+  const broadcastPosition = (index, position) => {
+    if (channelRef.current) {
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'marker_move',
+        payload: { index, position }
+      });
+    }
+  };
+
+  const handleMarkerDrag = (index, e) => {
+    const marker = e.target;
+    const position = marker.getLatLng();
+    const newPos = [position.lat, position.lng];
+
+    // 1. Bhai, update optimistically so user doesn't wait
+    startTransition(() => {
+      addOptimisticLocation({ index, position: newPos });
+    });
+
+    // 2. State update for real
+    setLocations(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], position: newPos };
+      return updated;
+    });
+
+    // 3. Tell the brothers (Broadcast)
+    broadcastPosition(index, newPos);
+  };
 
   useEffect(() => {
     if (itinerary?.location) {
@@ -172,9 +246,15 @@ const TripMap = ({ itinerary, formattedResponse }) => {
           </div>
           <div className="text-right">
             <p className="text-xs text-white/40">Total Distance</p>
-            <p className="text-xl font-black text-primary">
+            <motion.p 
+              key={calculateTotalDistance(locations)}
+              initial={{ scale: 1.5, color: '#FFF' }}
+              animate={{ scale: 1, color: '#FF7A2D' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 10 }}
+              className="text-xl font-black text-primary origin-right"
+            >
               {calculateTotalDistance(locations)} km
-            </p>
+            </motion.p>
           </div>
         </div>
 
@@ -198,10 +278,14 @@ const TripMap = ({ itinerary, formattedResponse }) => {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
 
-              {/* Day markers */}
-              {locations.map((location, index) => (
+              {/* Day markers with Sovereign Sprin Physics */}
+              {optimisticLocations.map((location, index) => (
                 <Marker
-                  key={index}
+                  key={`${index}-${location.position[0]}`}
+                  draggable={true}
+                  eventHandlers={{
+                    dragend: (e) => handleMarkerDrag(index, e)
+                  }}
                   position={location.position}
                   icon={createDayIcon(location.dayNumber)}
                 >

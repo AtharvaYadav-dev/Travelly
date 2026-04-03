@@ -1,143 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  /* 🎨 PREMIUM DUAL THEME COLOR SYSTEM */
-
-  /* Light Theme Colors */
-  --color-light-bg: #FAFAFA;
-  --color-light-surface: #FFFFFF;
-  --color-light-card: #F5F5F7;
-  --color-light-text: #1A1A1A;
-  --color-light-text-secondary: #6B6B6B;
-  --color-light-border: rgba(0, 0, 0, 0.08);
-
-  /* Dark Theme Colors */
-  --color-dark-bg: #0A0A0A;
-  --color-dark-surface: #141414;
-  --color-dark-card: #1E1E1E;
-  --color-dark-text: #FFFFFF;
-  --color-dark-text-secondary: #A0A0A0;
-  --color-dark-border: rgba(255, 255, 255, 0.08);
-
-  /* Brand Colors - Premium Gradient System */
-  --color-primary: #FF6B35;
-  --color-primary-dark: #E85A2A;
-  --color-secondary: #4ECDC4;
-  --color-accent: #FFE66D;
-  --color-luxury: #9B59B6;
-
-  /* Gradient Definitions */
-  --gradient-primary: linear-gradient(135deg, #FF6B35 0%, #FF8E53 100%);
-  --gradient-secondary: linear-gradient(135deg, #4ECDC4 0%, #44A3A0 100%);
-  --gradient-luxury: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-sunset: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFE66D 100%);
-  --gradient-ocean: linear-gradient(135deg, #667eea 0%, #4ECDC4 100%);
-
-  /* Glass Effects */
-  --glass-light: rgba(255, 255, 255, 0.7);
-  --glass-dark: rgba(20, 20, 20, 0.7);
-  --glass-border-light: rgba(255, 255, 255, 0.18);
-  --glass-border-dark: rgba(255, 255, 255, 0.08);
-
-  /* Shadows - Premium System */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.16);
-  --shadow-2xl: 0 40px 100px rgba(0, 0, 0, 0.24);
-  --shadow-glow-primary: 0 0 40px rgba(255, 107, 53, 0.3);
-  --shadow-glow-secondary: 0 0 40px rgba(78, 205, 196, 0.3);
-
-  /* Spacing System */
-  --space-xs: 0.5rem;
-  --space-sm: 1rem;
-  --space-md: 1.5rem;
-  --space-lg: 2rem;
-  --space-xl: 3rem;
-  --space-2xl: 4rem;
-  --space-3xl: 6rem;
-
-  /* Border Radius */
-  --radius-sm: 0.5rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
-  --radius-2xl: 3rem;
-  --radius-full: 9999px;
+  /* 🎨 SOVEREIGN LUXURY COLOR SYSTEM */
+  --color-luxury-bg: #050505;
+  --color-luxury-gold: #C5A059;
+  --color-luxury-glass: rgba(255, 255, 255, 0.03);
 }
 
 :root {
-  --font-main: 'Inter', 'Plus Jakarta Sans', sans-serif;
+  --font-main: 'Inter', sans-serif;
+  --font-display: 'Cormorant Garamond', serif;
   --font-heading: 'Outfit', sans-serif;
-  --font-display: 'Playfair Display', serif;
-  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-ultra: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  --vh: 1dvh; /* Dynamic Viewport Unit Utility */
 }
 
-/* 🌓 THEME SWITCHING */
-html {
-  scroll-behavior: smooth;
-  overflow-x: hidden;
+/* 🎭 SOVEREIGN FULL-SCREEN CONTAINERS */
+.h-screen-dvh {
+  height: calc(var(--vh, 1vh) * 100);
+  height: 100dvh;
 }
 
-html[data-theme="light"] {
-  --bg-primary: var(--color-light-bg);
-  --bg-surface: var(--color-light-surface);
-  --bg-card: var(--color-light-card);
-  --text-primary: var(--color-light-text);
-  --text-secondary: var(--color-light-text-secondary);
-  --border-color: var(--color-light-border);
-  --glass-bg: var(--glass-light);
-  --glass-border: var(--glass-border-light);
+/* 📉 PERFORMANCE SHARDING (Low Power Mode) */
+.low-power-mode .luxury-noise::after,
+.low-power-mode .mesh-bg-luxury {
+  display: none !important;
 }
 
-html[data-theme="dark"] {
-  --bg-primary: var(--color-dark-bg);
-  --bg-surface: var(--color-dark-surface);
-  --bg-card: var(--color-dark-card);
-  --text-primary: var(--color-dark-text);
-  --text-secondary: var(--color-dark-text-secondary);
-  --border-color: var(--color-dark-border);
-  --glass-bg: var(--glass-dark);
-  --glass-border: var(--glass-border-dark);
+.low-power-mode * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-/* Auto-detect system preference */
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]) {
-    --bg-primary: var(--color-dark-bg);
-    --bg-surface: var(--color-dark-surface);
-    --bg-card: var(--color-dark-card);
-    --text-primary: var(--color-dark-text);
-    --text-secondary: var(--color-dark-text-secondary);
-    --border-color: var(--color-dark-border);
-    --glass-bg: var(--glass-dark);
-    --glass-border: var(--glass-border-dark);
-  }
+/* 💠 LUXURY NOISE (SVG Filter) */
+.luxury-noise {
+  background: relative;
 }
 
-body {
-  font-family: var(--font-main);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* 🎭 PREMIUM NOISE TEXTURE */
-.noise-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
+.luxury-noise::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
+  z-index: 10;
   pointer-events: none;
-  opacity: 0.02;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  animation: grain 8s steps(10) infinite;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* 💎 SOVEREIGN FROSTED GLASS */
+@utility premium-glass {
+  background: var(--color-luxury-glass);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+@utility premium-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.05), transparent);
+  pointer-events: none;
 }
 
 @keyframes grain {
