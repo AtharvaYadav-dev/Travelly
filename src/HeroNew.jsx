@@ -190,7 +190,7 @@ const HeroNew = () => {
   ];
 
   return (
-    <div className="w-full bg-[var(--bg-primary)] overflow-x-hidden" ref={containerRef}>
+    <div className="w-full bg-[var(--bg-primary)] overflow-x-hidden force-dark-mode" ref={containerRef}>
 
       {/* 🎬 HERO SECTION WITH VIDEO BACKGROUND */}
       <section ref={heroRef} className="relative h-screen flex flex-col items-center justify-center overflow-hidden">

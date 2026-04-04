@@ -2,17 +2,84 @@
 @import "tailwindcss";
 
 @theme {
-  /* 🎨 SOVEREIGN LUXURY COLOR SYSTEM */
-  --color-luxury-bg: #050505;
-  --color-luxury-gold: #C5A059;
-  --color-luxury-glass: rgba(255, 255, 255, 0.03);
+  /* 🎨 SOVEREIGN VOYAGER DESIGN SYSTEM */
+  --color-luxury-bg: #030303;
+  --color-luxury-gold: #D4AF37;
+  --color-luxury-glass: rgba(255, 255, 255, 0.04);
+  
+  /* 🌈 DESIGN TOKENS (DYNAMIC) */
+  --bg-primary: var(--bg-primary-val);
+  --bg-surface: var(--bg-surface-val);
+  --bg-card: var(--bg-card-val);
+  
+  --color-primary: #FF6B35;
+  --color-primary-dark: #E85A2A;
+  --color-secondary: #4ECDC4;
+  --color-luxury: #C5A059;
+  
+  --text-primary: var(--text-primary-val);
+  --text-secondary: var(--text-secondary-val);
+  --text-muted: var(--text-muted-val);
+  
+  /* 🌊 CINEMATIC GRADIENTS */
+  --gradient-primary: linear-gradient(135deg, #FF6B35 0%, #FF1E1E 100%);
+  --gradient-secondary: linear-gradient(135deg, #4ECDC4 0%, #556270 100%);
+  --gradient-luxury: linear-gradient(135deg, #C5A059 0%, #FFD700 100%);
+  --gradient-sunset: linear-gradient(90deg, #FFD93D 0%, #FF6B35 50%, #FF1E1E 100%);
+  --gradient-ocean: linear-gradient(135deg, #0BC6E3 0%, #0072FF 100%);
+  
+  /* 💎 GLASSMORPHISM TOKENS */
+  --glass-bg: var(--glass-bg-val);
+  --glass-border: var(--glass-border-val);
+  --glass-blur: blur(40px) saturate(200%);
+  
+  /* 🛡️ PREMIUM SHADOWS */
+  --shadow-md: var(--shadow-md-val);
+  --shadow-xl: var(--shadow-xl-val);
+  --shadow-glow-primary: 0 0 20px rgba(255, 107, 53, 0.3);
+  
+  /* ⚡ TRANSITIONS */
+  --transition-ultra: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: all 0.4s ease;
+
+  /* 🔗 TOKEN RE-MAPPING (The "Opposite Color" Magic) */
+  --color-white: var(--text-primary);
+  --color-black: var(--bg-primary);
 }
 
 :root {
   --font-main: 'Inter', sans-serif;
   --font-display: 'Cormorant Garamond', serif;
   --font-heading: 'Outfit', sans-serif;
-  --vh: 1dvh; /* Dynamic Viewport Unit Utility */
+  --vh: 1dvh;
+}
+
+/* 🌙 DARK MODE TOKENS (DEFAULT) */
+html[data-theme="dark"], :root:not([data-theme="light"]) {
+  --bg-primary-val: #050505;
+  --bg-surface-val: #0A0A0A;
+  --bg-card-val: rgba(25.5, 25.5, 25.5, 0.4);
+  --text-primary-val: #FFFFFF;
+  --text-secondary-val: rgba(255, 255, 255, 0.7);
+  --text-muted-val: rgba(255, 255, 255, 0.5);
+  --glass-bg-val: rgba(255, 255, 255, 0.03);
+  --glass-border-val: rgba(255, 255, 255, 0.08);
+  --shadow-md-val: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+  --shadow-xl-val: 0 12px 64px 0 rgba(0, 0, 0, 0.9);
+}
+
+/* ☀️ LIGHT MODE TOKENS */
+html[data-theme="light"] {
+  --bg-primary-val: #FFFFFF;
+  --bg-surface-val: #F9FAFB;
+  --bg-card-val: #FFFFFF;
+  --text-primary-val: #111827;
+  --text-secondary-val: #4B5563;
+  --text-muted-val: #9CA3AF;
+  --glass-bg-val: rgba(255, 255, 255, 0.7);
+  --glass-border-val: rgba(0, 0, 0, 0.1);
+  --shadow-md-val: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-xl-val: 0 20px 25px -5px rgb(0 0 0 / 0.1);
 }
 
 /* 🎭 SOVEREIGN FULL-SCREEN CONTAINERS */
@@ -51,16 +118,18 @@
 }
 
 /* 💎 SOVEREIGN FROSTED GLASS */
-@utility premium-glass {
-  background: var(--color-luxury-glass);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.premium-glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-ultra);
 }
 
-@utility premium-glass::before {
+.premium-glass::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -177,21 +246,12 @@ html[data-theme="dark"] .mesh-blob {
   }
 }
 
-/* 💎 GLASSMORPHISM UTILITIES */
-@utility premium-glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-ultra);
-}
-
+/* 💎 GLASSMORPHISM HOVER STATE */
 .premium-glass:hover {
-  background: var(--glass-bg);
-  border-color: rgba(255, 107, 53, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-primary);
   box-shadow: var(--shadow-xl), var(--shadow-glow-primary);
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.02);
 }
 
 /* 🎨 GRADIENT TEXT UTILITIES */
@@ -829,65 +889,52 @@ html {
   }
 }
 
-/* 📝 TEXT VISIBILITY IMPROVEMENTS */
+/* 📝 TEXT VISIBILITY IMPROVEMENTS (THEME-AWARE) */
 /* Ensure all text has good contrast and is easily readable */
+
+/* Global Text Visibility */
+body {
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
 
 /* Input and textarea visibility */
 input,
 textarea,
 select {
   color: var(--text-primary) !important;
-  background-color: rgba(0, 0, 0, 0.3) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-html[data-theme="light"] input,
-html[data-theme="light"] textarea,
-html[data-theme="light"] select {
-  color: var(--text-primary) !important;
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  border-color: rgba(0, 0, 0, 0.15) !important;
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--glass-border) !important;
 }
 
 /* Placeholder text visibility */
 input::placeholder,
 textarea::placeholder {
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: var(--text-muted) !important;
   opacity: 1 !important;
-}
-
-html[data-theme="light"] input::placeholder,
-html[data-theme="light"] textarea::placeholder {
-  color: rgba(0, 0, 0, 0.5) !important;
-  opacity: 1 !important;
-}
-
-/* Select option visibility */
-select option {
-  background-color: #1a1a1a !important;
-  color: white !important;
-}
-
-html[data-theme="light"] select option {
-  background-color: white !important;
-  color: black !important;
 }
 
 /* Label visibility */
 label {
-  color: rgba(255, 255, 255, 0.8) !important;
+  color: var(--text-secondary) !important;
   font-weight: 600 !important;
-}
-
-html[data-theme="light"] label {
-  color: rgba(0, 0, 0, 0.8) !important;
 }
 
 /* Ensure minimum contrast for all text */
 .text-white\/10,
 .text-white\/20,
-.text-white\/30 {
-  color: rgba(255, 255, 255, 0.7) !important;
+.text-white\/30,
+.text-white\/40,
+.text-white\/50,
+.text-white\/60,
+.text-white\/70,
+.text-opacity-10,
+.text-opacity-20,
+.text-opacity-30,
+.text-opacity-40,
+.text-opacity-50 {
+  color: var(--text-secondary) !important;
+  opacity: 1 !important;
 }
 
 /* Form field focus states */
@@ -899,39 +946,11 @@ select:focus {
   outline: none !important;
 }
 
-/* Premium input styling override */
+/* Premium input styling */
 .premium-input {
-  color: white !important;
-  background-color: rgba(15, 23, 42, 0.8) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-.premium-input::placeholder {
-  color: rgba(255, 255, 255, 0.6) !important;
-}
-
-html[data-theme="light"] .premium-input {
-  color: black !important;
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(0, 0, 0, 0.15) !important;
-}
-
-html[data-theme="light"] .premium-input::placeholder {
-  color: rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Ensure text in dark backgrounds is visible */
-.bg-slate-900 *,
-.bg-slate-950 *,
-.bg-black * {
-  color: white;
-}
-
-/* Override low opacity text */
-.text-opacity-10,
-.text-opacity-20,
-.text-opacity-30 {
-  opacity: 0.7 !important;
+  color: var(--text-primary) !important;
+  background-color: var(--bg-surface) !important;
+  border-color: var(--glass-border) !important;
 }
 
 /* Better contrast for step labels */
@@ -941,288 +960,93 @@ html[data-theme="light"] .premium-input::placeholder {
 }
 
 /* Improve visibility of all headings */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary) !important;
 }
 
-/* Date and time inputs */
+/* Date and time inputs scheme */
 input[type="date"],
 input[type="time"],
 input[type="datetime-local"] {
-  color: white !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] input[type="date"],
+html[data-theme="dark"] input[type="time"],
+html[data-theme="dark"] input[type="datetime-local"] {
   color-scheme: dark;
 }
 
 html[data-theme="light"] input[type="date"],
 html[data-theme="light"] input[type="time"],
 html[data-theme="light"] input[type="datetime-local"] {
-  color: black !important;
   color-scheme: light;
 }
 
-/* Number inputs */
-input[type="number"] {
-  color: white !important;
-}
-
-html[data-theme="light"] input[type="number"] {
-  color: black !important;
-}
-
-/* Ensure all interactive elements are visible */
-button,
-a {
-  color: inherit;
-  opacity: 1 !important;
-}
-
-/* Fix for very low opacity elements */
-[class*="opacity-10"],
-[class*="opacity-20"],
-[class*="opacity-30"] {
-  opacity: 0.7 !important;
-}
-
 /* 🎯 TEXT SELECTION VISIBILITY */
-/* Ensure selected text is clearly visible with high contrast */
-
-/* Strongest possible selection rules */
-body ::selection,
-body *::selection,
-html ::selection,
-html *::selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-}
-
-body ::-moz-selection,
-body *::-moz-selection,
-html ::-moz-selection,
-html *::-moz-selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-}
-
-/* Global text selection - All browsers */
 ::selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-}
-
-::-moz-selection {
-  background-color: #FF6B35 !important;
+  background-color: var(--color-primary) !important;
   color: #FFFFFF !important;
   text-shadow: none !important;
 }
 
-/* Light theme selection */
-html[data-theme="light"] ::selection,
-html[data-theme="light"] *::selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-  -webkit-text-fill-color: #FFFFFF !important;
+/* 🦶 FOOTER TEXT - ALWAYS HIGH CONTRAST */
+footer {
+  background-color: var(--bg-surface) !important;
 }
 
-html[data-theme="light"] ::-moz-selection,
-html[data-theme="light"] *::-moz-selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-}
-
-/* Dark theme selection */
-html[data-theme="dark"] ::selection,
-html[data-theme="dark"] *::selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-}
-
-html[data-theme="dark"] ::-moz-selection,
-html[data-theme="dark"] *::-moz-selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-}
-
-/* Input and textarea selection */
-input::selection,
-textarea::selection,
-select::selection,
-input *::selection,
-textarea *::selection,
-select *::selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-}
-
-input::-moz-selection,
-textarea::-moz-selection,
-select::-moz-selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-}
-
-/* Specific element selections */
-p::selection,
-span::selection,
-div::selection,
-a::selection,
-h1::selection,
-h2::selection,
-h3::selection,
-h4::selection,
-h5::selection,
-h6::selection,
-li::selection,
-td::selection,
-th::selection,
-label::selection,
-button::selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-}
-
-p::-moz-selection,
-span::-moz-selection,
-div::-moz-selection,
-a::-moz-selection,
-h1::-moz-selection,
-h2::-moz-selection,
-h3::-moz-selection,
-h4::-moz-selection,
-h5::-moz-selection,
-h6::-moz-selection,
-li::-moz-selection,
-td::-moz-selection,
-th::-moz-selection,
-label::-moz-selection,
-button::-moz-selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-}
-
-/* Override any gradient text on selection */
-.gradient-text-primary::selection,
-.gradient-text-secondary::selection,
-.gradient-text-sunset::selection,
-.gradient-text-luxury::selection,
-[class*="gradient-text"]::selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  background-clip: unset !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  text-shadow: none !important;
-}
-
-.gradient-text-primary::-moz-selection,
-.gradient-text-secondary::-moz-selection,
-.gradient-text-sunset::-moz-selection,
-.gradient-text-luxury::-moz-selection,
-[class*="gradient-text"]::-moz-selection {
-  background-color: #FF6B35 !important;
-  color: #FFFFFF !important;
-  text-shadow: none !important;
-}
-
-/* 🦶 FOOTER TEXT - ALWAYS WHITE */
-/* Ensure footer text is white in both light and dark themes */
-
-footer,
-footer * {
-  color: white !important;
-}
-
-footer h1,
-footer h2,
-footer h3,
-footer h4,
-footer h5,
-footer h6 {
-  color: white !important;
-}
-
-footer p,
-footer span,
-footer a,
-footer li,
-footer div {
-  color: rgba(255, 255, 255, 0.9) !important;
+footer h1, footer h2, footer h3, footer h4, footer h5, footer h6,
+footer p, footer span, footer a, footer li, footer div {
+  color: var(--text-primary) !important;
 }
 
 footer a:hover {
-  color: #FF6B35 !important;
+  color: var(--color-primary) !important;
 }
 
-/* Ensure footer text is white in light theme */
-html[data-theme="light"] footer,
-html[data-theme="light"] footer * {
-  color: white !important;
+/* 🌑 FORCE DARK MODE UTILITY */
+.force-dark-mode {
+  --bg-primary-val: #050505;
+  --bg-surface-val: #0A0A0A;
+  --bg-card-val: rgba(25.5, 25.5, 25.5, 0.4);
+  --text-primary-val: #FFFFFF;
+  --text-secondary-val: rgba(255, 255, 255, 0.7);
+  --text-muted-val: rgba(255, 255, 255, 0.5);
+  --glass-bg-val: rgba(255, 255, 255, 0.03);
+  --glass-border-val: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF !important;
+  background-color: #050505 !important;
 }
 
-html[data-theme="light"] footer h1,
-html[data-theme="light"] footer h2,
-html[data-theme="light"] footer h3,
-html[data-theme="light"] footer h4,
-html[data-theme="light"] footer h5,
-html[data-theme="light"] footer h6 {
-  color: white !important;
+.force-dark-mode * {
+  color: inherit;
 }
 
-html[data-theme="light"] footer p,
-html[data-theme="light"] footer span,
-html[data-theme="light"] footer a,
-html[data-theme="light"] footer li,
-html[data-theme="light"] footer div {
-  color: rgba(255, 255, 255, 0.9) !important;
+/* Explicit Fix for Hero Section Over Video */
+.force-dark-mode::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.4), var(--bg-primary-val));
+  pointer-events: none;
+  z-index: 5;
 }
 
-html[data-theme="light"] footer a:hover {
-  color: #FF6B35 !important;
+/* Ensure testimonials and cards respect the theme */
+.card-premium p, 
+.card-premium span, 
+.premium-glass p, 
+.premium-glass span {
+  color: var(--text-secondary) !important;
 }
 
-/* Ensure footer text is white in dark theme */
-html[data-theme="dark"] footer,
-html[data-theme="dark"] footer * {
-  color: white !important;
-}
-
-html[data-theme="dark"] footer h1,
-html[data-theme="dark"] footer h2,
-html[data-theme="dark"] footer h3,
-html[data-theme="dark"] footer h4,
-html[data-theme="dark"] footer h5,
-html[data-theme="dark"] footer h6 {
-  color: white !important;
-}
-
-html[data-theme="dark"] footer p,
-html[data-theme="dark"] footer span,
-html[data-theme="dark"] footer a,
-html[data-theme="dark"] footer li,
-html[data-theme="dark"] footer div {
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-
-html[data-theme="dark"] footer a:hover {
-  color: #FF6B35 !important;
+.card-premium h1, 
+.card-premium h2, 
+.card-premium h3, 
+.premium-glass h1, 
+.premium-glass h2, 
+.premium-glass h3 {
+  color: var(--text-primary) !important;
 }
 
 /* Map Component Styles */
